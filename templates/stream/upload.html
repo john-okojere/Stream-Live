@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Upload Past Stream{% endblock %}
+
+{% block head %}
+<style>
+  /* Page-specific polish */
+  .upload-header p{ color:var(--muted); margin:0 }
+  .form-pane, .files-pane{
+    border:1px solid var(--ring);
+    border-radius:1rem;
+    background:var(--glass);
+    backdrop-filter:saturate(160%) blur(8px);
+    box-shadow:0 10px 24px rgba(0,0,0,.25);
+  }
+  .form-pane .form-group{ margin-bottom:14px }
+  .form-pane label{ font-weight:700; margin-bottom:.35rem }
+  .help-text{ color:var(--muted); font-size:.9rem }
+
+  /* Make default Django fields look “Bootstrap-ish” without extra deps */
+  .form-pane input[type="text"],
+  .form-pane input[type="date"],
+  .form-pane textarea{
+    width:100%; padding:.6rem .8rem; border:1px solid var(--ring);
+    border-radius:.6rem; background:#0b1222; color:#e6edf3;
+  }
+  .form-pane textarea{ min-height:120px; resize:vertical }
+
+  /* Error styling */
+  .errorlist{ list-style:none; padding-left:0; margin:.35rem 0 0 0 }
+  .errorlist li{
+    background:#5a161b; color:#ffd2d6; border:1px solid #732027;
+    padding:.4rem .6rem; border-radius:.5rem; font-size:.9rem;
+  }
+
+  /* Dropzones */
+  .dz{
+    position:relative; border:1px dashed rgba(255,255,255,.25);
+    border-radius:.9rem; padding:14px;
+    background:rgba(255,255,255,.03);
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .dz:hover{ border-color:rgba(255,255,255,.45) }
+  .dz.is-dragover{ background:rgba(255,255,255,.06); border-color:#fff }
+
+  .dz-title{ display:flex; align-items:center; gap:.5rem; font-weight:800 }
+  .dz-sub{ color:var(--muted); font-size:.9rem; margin:0 }
+  .dz-preview{ margin-top:.75rem; display:flex; gap:.75rem; align-items:center }
+  .dz-cover{
+    width:64px; height:64px; border-radius:.6rem; object-fit:cover; background:#202a3f;
+  }
+  .dz-audio audio{ width:100%; height:36px }
+
+  .page-actions{ display:flex; gap:.6rem; flex-wrap:wrap }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="container py-5">
+  <div class="upload-header d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+    <div>
+      <h1 class="h3 m-0">Upload Past Stream</h1>
+      <p>Add title and details on the left, then drop your cover and audio on the right.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn btn-soft btn-sm" href="{% url 'stream:past_list' %}"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+
+  {# Show non-field errors, if any #}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row g-3">
+      <!-- Left: details -->
+      <div class="col-lg-7">
+        <div class="form-pane p-3 p-md-4">
+          <div class="form-group">
+            {{ form.title.label_tag }} {{ form.title }}
+            {{ form.title.errors }}
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                {{ form.speaker.label_tag }} {{ form.speaker }}
+                {{ form.speaker.errors }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                {{ form.date.label_tag }} {{ form.date }}
+                {{ form.date.errors }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            {{ form.description.label_tag }} {{ form.description }}
+            {{ form.description.errors }}
+            <div class="help-text">Optional: brief summary, scripture references, etc.</div>
+          </div>
+
+          <div class="form-group">
+            {{ form.tags.label_tag }} {{ form.tags }}
+            {{ form.tags.errors }}
+            <div class="help-text">Comma-separated (e.g. <em>faith, worship, prayer</em>)</div>
+          </div>
+
+          <div class="mt-3">
+            <button class="btn btn-brand"><i class="bi bi-save"></i> Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: files -->
+      <div class="col-lg-5">
+        <div class="files-pane p-3 p-md-4">
+          <!-- Keep Django’s original inputs (hidden) so validation works -->
+          <div class="d-none">
+            {{ form.cover }} {{ form.cover.errors }}
+            {{ form.audio }} {{ form.audio.errors }}
+          </div>
+
+          <!-- Cover dropzone -->
+          <section class="dz" id="dzCover">
+            <div class="dz-title"><i class="bi bi-image"></i> Cover image</div>
+            <p class="dz-sub">PNG/JPG. Recommended square (e.g. 1000×1000).</p>
+            <div class="dz-preview" id="coverPreview">
+              <img class="dz-cover" id="coverThumb" src="{% static 'assets/gatherings-flyer.png' %}" alt="">
+              <div class="small" style="color:var(--muted)">
+                <div id="coverName">No file selected</div>
+                <div id="coverSize"></div>
+              </div>
+            </div>
+            <div class="mt-2">
+              <button type="button" class="btn btn-soft btn-sm" id="pickCover"><i class="bi bi-upload"></i> Choose image</button>
+            </div>
+          </section>
+
+          <!-- Spacer -->
+          <div style="height:12px"></div>
+
+          <!-- Audio dropzone -->
+          <section class="dz" id="dzAudio">
+            <div class="dz-title"><i class="bi bi-music-note-beamed"></i> Audio file</div>
+            <p class="dz-sub">MP3/M4A/WAV. We’ll detect duration automatically.</p>
+            <div class="dz-preview dz-audio" id="audioPreview">
+              <div class="flex-grow-1">
+                <div class="small" style="color:var(--muted)">
+                  <div id="audioName">No file selected</div>
+                  <div id="audioMeta"></div>
+                </div>
+                <audio id="audioPlayer" controls style="margin-top:.35rem;"></audio>
+              </div>
+            </div>
+            <div class="mt-2">
+              <button type="button" class="btn btn-soft btn-sm" id="pickAudio"><i class="bi bi-upload"></i> Choose audio</button>
+            </div>
+          </section>
+
+          <div class="mt-3">
+            <button class="btn btn-brand w-100"><i class="bi bi-cloud-arrow-up"></i> Save & Upload</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Utilities
+  function bytes(n){
+    if(!n && n !== 0) return "";
+    const u=['B','KB','MB','GB']; let i=0; while(n>=1024 && i<u.length-1){ n/=1024; i++; }
+    return n.toFixed(n>=1024?1:0)+' '+u[i];
+  }
+  function setDrag(el){
+    el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('is-dragover'); });
+    ['dragleave','dragend','drop'].forEach(evt=> el.addEventListener(evt, ()=> el.classList.remove('is-dragover')));
+  }
+
+  // COVER
+  const dzCover = document.getElementById('dzCover');
+  const coverInput = document.getElementById('id_cover');   // from Django
+  const pickCover = document.getElementById('pickCover');
+  const coverThumb = document.getElementById('coverThumb');
+  const coverName = document.getElementById('coverName');
+  const coverSize = document.getElementById('coverSize');
+  setDrag(dzCover);
+
+  function handleCover(file){
+    if(!file) return;
+    coverName.textContent = file.name;
+    coverSize.textContent = bytes(file.size);
+    const ok = /^image\//.test(file.type);
+    if(ok){
+      const r = new FileReader();
+      r.onload = e => coverThumb.src = e.target.result;
+      r.readAsDataURL(file);
+    }
+  }
+  pickCover.addEventListener('click', ()=> coverInput && coverInput.click());
+  dzCover.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(file){
+      // Put file into hidden Django input
+      const dt = new DataTransfer(); dt.items.add(file);
+      coverInput.files = dt.files;
+      handleCover(file);
+    }
+  });
+  if(coverInput){
+    coverInput.addEventListener('change', ()=> handleCover(coverInput.files[0]));
+  }
+
+  // AUDIO
+  const dzAudio = document.getElementById('dzAudio');
+  const audioInput = document.getElementById('id_audio');   // from Django
+  const pickAudio = document.getElementById('pickAudio');
+  const audioName = document.getElementById('audioName');
+  const audioMeta = document.getElementById('audioMeta');
+  const audioPlayer = document.getElementById('audioPlayer');
+  setDrag(dzAudio);
+
+  function formatDuration(sec){
+    sec = Math.round(sec||0);
+    const m = Math.floor(sec/60), s = sec%60, h = Math.floor(m/60);
+    return h ? `${h}:${String(m%60).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+             : `${m}:${String(s).padStart(2,'0')}`;
+  }
+  function handleAudio(file){
+    if(!file) return;
+    audioName.textContent = file.name + ' (' + bytes(file.size) + ')';
+    audioPlayer.src = URL.createObjectURL(file);
+    audioPlayer.onloadedmetadata = ()=> {
+      audioMeta.textContent = 'Duration: ' + formatDuration(audioPlayer.duration||0);
+    };
+  }
+  pickAudio.addEventListener('click', ()=> audioInput && audioInput.click());
+  dzAudio.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(file){
+      const dt = new DataTransfer(); dt.items.add(file);
+      audioInput.files = dt.files;
+      handleAudio(file);
+    }
+  });
+  if(audioInput){
+    audioInput.addEventListener('change', ()=> handleAudio(audioInput.files[0]));
+  }
+</script>
+{% endblock %}

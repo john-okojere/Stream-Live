@@ -1,0 +1,409 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Layers of Truth | Live Service Audio Stream{% endblock %}
+{% block meta %}
+<!-- Primary Meta -->
+<meta name="title" content="Layers of Truth | Live Service Audio Stream" />
+<meta name="description" content="Join the Layers of Truth live service audio stream. Listen live, worship with us, and experience God's presence wherever you are." />
+<link rel="canonical" href="https://layersoftruth.org/live" />
+
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://layersoftruth.org/live" />
+<meta property="og:title" content="Layers of Truth | Live Service Audio Stream" />
+<meta property="og:description" content="Join the Layers of Truth live service audio stream. Listen live, worship with us, and experience God's presence wherever you are." />
+<meta property="og:image" content="https://layersoftruth.org/assets/gatherings-flyer.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://layersoftruth.org/assets/gatherings-flyer.png" />
+<meta name="twitter:site" content="@Layers_of_Truth" />
+<meta name="theme-color" content="#0d1b2a">
+<meta name="color-scheme" content="dark light">
+{% endblock meta %}
+{% block head %}
+<!-- Fonts + Icons + Bootstrap -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+<link rel="preload" as="image" href="{% static 'assets/worship.png' %}">
+<link rel="preload" as="image" href="{% static 'assets/congregation.png' %}">
+<link rel="preconnect" href="https://embed.radio.co" crossorigin>
+
+<style>
+:root{
+  --ink:#0d1b2a; --ink-2:#1a2e4f;
+  --bg:#070b12; --card:#0f172a; --ring:#1f2b43;
+  --muted:#a8b3c7; --brand:#6a7dff; --brand-2:#d248ff; --accent:#ff6a95;
+  --glass:rgba(255,255,255,.06);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:radial-gradient(1200px 800px at -20% -20%, rgba(106,125,255,.18), transparent 60%),
+             radial-gradient(900px 600px at 120% 0%, rgba(210,72,255,.15), transparent 60%),
+             var(--bg);
+  color:#e6edf3; overflow-x:hidden;
+}
+html { scroll-behavior: smooth; }
+/* Smooth page fade */
+@keyframes pageIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+main, header{animation:pageIn .5s ease .05s both}
+
+/* HERO with slideshow + animated gradient */
+header{
+  position:relative; overflow:hidden; color:#fff; isolation:isolate;
+  background:linear-gradient(135deg, var(--ink), var(--ink-2));
+}
+.hero{
+  position:relative; min-height:46vh; display:grid; place-items:center; text-align:center;
+}
+.hero-bg, .hero-bg.next{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  filter:brightness(.55) saturate(1.1);
+  transition:opacity 1.1s ease; opacity:1; z-index:-2;
+}
+.hero-bg.next{opacity:0}
+.hero-gradient{
+  position:absolute; inset:0; z-index:-1;
+  background:radial-gradient(60% 80% at 20% 10%, rgba(106,125,255,.35), transparent 60%),
+             radial-gradient(70% 80% at 80% 5%, rgba(210,72,255,.3), transparent 60%);
+  mix-blend-mode:screen;
+  animation:glow 12s ease-in-out infinite alternate;
+}
+@keyframes glow{from{opacity:.6} to{opacity:.9}}
+
+/* Floating orbs */
+.orb{position:absolute; width:44vmin; height:44vmin; border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), rgba(255,255,255,0) 60%);
+  filter:blur(30px); opacity:.25; animation:float 22s ease-in-out infinite;}
+.orb.one{top:-10vmin; left:-10vmin}
+.orb.two{bottom:-12vmin; right:-5vmin; animation-delay:-8s}
+@keyframes float{ 0%,100%{ transform:translateY(0) translateX(0)} 50%{ transform:translateY(10px) translateX(6px)}}
+
+.logo{height:56px}
+.brand{font-weight:800; letter-spacing:.5px}
+.sub{opacity:.85}
+
+/* GLASS player with 3D tilt */
+.player-card{
+  border:1px solid var(--ring); border-radius:1.1rem; background:var(--glass);
+  backdrop-filter:saturate(160%) blur(10px);
+  box-shadow:0 18px 36px rgba(0,0,0,.35);
+  transition:transform .25s ease, box-shadow .25s ease;
+  will-change:transform;
+}
+.player-card:hover{box-shadow:0 24px 46px rgba(0,0,0,.48)}
+/* “Now Playing” row */
+.np{
+  display:flex; align-items:center; gap:1rem; padding:.85rem; border:1px solid var(--ring);
+  background:rgba(255,255,255,.03); border-radius:.9rem;
+}
+@media screen and (max-width:760px) {
+  .np{
+    flex-direction: column;
+  }
+}
+.np-art{width:60px; height:60px; border-radius:.7rem; object-fit:cover; background:#202a3f}
+.np-title{margin:0; font-weight:800; font-size:1.05rem; overflow:hidden}
+.np-title.marquee span{ display:inline-block; padding-right:2rem; animation:marquee 12s linear infinite}
+@keyframes marquee{ from{ transform:translateX(0)} to{ transform:translateX(-100%)} }
+.np-artist{margin:0; color:var(--muted)}
+.live-dot{position:relative; display:inline-flex; align-items:center; gap:.45rem; font-weight:700}
+.live-dot::before{
+  content:""; width:10px; height:10px; border-radius:50%; background:#ff4e6a; display:inline-block;
+  box-shadow:0 0 0 0 rgba(255,78,106,.7); animation:pulse 1.6s infinite;
+}
+@keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(255,78,106,.7)} 70%{box-shadow:0 0 0 10px rgba(255,78,106,0)} 100%{box-shadow:0 0 0 0 rgba(255,78,106,0)}}
+
+/* Buttons */
+.btn-soft{border:1px solid var(--ring); background:#0b1222; color:#e6edf3; border-radius:.7rem}
+.btn-brand{border:0; border-radius:.7rem; color:#fff; font-weight:700;
+  background:linear-gradient(90deg, var(--brand), var(--brand-2));}
+
+/* Social pills */
+.social{gap:.55rem}
+.social a{
+  display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border:1px solid var(--ring);
+  border-radius:999px; background:#0b1222; color:#e6edf3; text-decoration:none; font-weight:700;
+  transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+.social a:hover{ transform:translateY(-2px); box-shadow:0 10px 20px rgba(0,0,0,.35) }
+.social a.youtube:hover{ background:#ff0000 }
+.social a.instagram:hover{ background:#e1306c }
+.social a.facebook:hover{ background:#1877f2 }
+.social a.twitter:hover{ background:#000 }
+.social a.website:hover{ background:#0d6efd }
+
+/* Gallery */
+.gallery{
+  display:grid; gap:12px; grid-template-columns:repeat(12,1fr);
+}
+.tile{ grid-column:span 6; border-radius:1rem; overflow:hidden; position:relative; cursor:zoom-in;
+  transform:translateY(16px); opacity:0; transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s}
+.tile img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .45s ease}
+.tile:hover img{ transform:scale(1.05) }
+.tile.show{ transform:none; opacity:1 }
+.tile.tall{ grid-column:span 7; height:260px }
+.tile.wide{ grid-column:span 5; height:260px }
+@media (max-width: 992px){ .tile,.tile.tall,.tile.wide{ grid-column:span 12; height:220px }}
+
+/* Sticky mini-player */
+.mini-box{
+  position:fixed; bottom:12px; z-index:50;width: 100%;
+}
+.mini{
+  display:flex; align-items:center; gap:1rem; padding:.65rem .8rem; justify-content: space-between;
+  background:var(--glass); border:1px solid var(--ring); border-radius:.9rem;
+  backdrop-filter:saturate(160%) blur(8px);
+  transform:translateY(120%); opacity:0; transition:transform .35s ease, opacity .35s ease;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  width:100%;
+}
+.mini.show{ transform:none; opacity:1 }
+.mini img{ width:36px; height:36px; border-radius:.5rem; object-fit:cover }
+
+/* Lightbox */
+.lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; place-items:center; z-index:60 }
+.lightbox.open{ display:grid; animation:fade .25s ease both }
+.lightbox img{ max-width:92vw; max-height:85vh; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,.6) }
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+
+/* Reveal on scroll generic */
+.reveal{ transform:translateY(18px); opacity:0; transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s}
+.reveal.show{ transform:none; opacity:1 }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+  .hero-gradient,.orb{display:none}
+}
+/* Player stage: fixed position/size for the embed */
+.player-stage{
+  border:1px solid var(--ring);
+  border-radius:1rem;
+  background:rgba(255,255,255,.04);
+  overflow:hidden;
+  /* aspect-ratio keeps the box perfect; min-height keeps it tall enough on small screens */
+  aspect-ratio: 16 / 9;
+  min-height:260px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+  scroll-margin-top: 80px; /* nice when jumping from the mini-player button */
+}
+@media (min-width:768px){ .player-stage{ min-height:360px; } }
+@media (min-width:1200px){ .player-stage{ min-height:420px; } }
+
+/* Make whatever the Radio.co script injects fill the stage */
+#rcPlayer, #rcPlayer > *, #rcPlayer iframe{
+  display:block;
+  border:0 !important;
+  border-radius:0 !important;
+}
+#rcPlayer, #rcPlayer > *, #rcPlayer iframe{
+  display:block;
+  border:0 !important;
+  border-radius:0 !important;
+  position:static !important;
+}
+.mini-box{
+  position:fixed;
+  left:0;              /* anchor */
+  right:0;             /* anchor */
+  bottom:12px;
+  z-index:50;
+  padding:20px;        /* you already had */
+  width:auto;          /* let left/right control width */
+}
+.mini{
+  width:min(100%, 980px);
+  margin:0 auto;       /* center */
+}
+.vr{
+  background-color: #fff !important;
+}
+</style>
+{% endblock head %}
+{% block content %}
+<header>
+  <div class="hero">
+    <div class="hero-bg" id="bgA" style="background-image:url({% static 'assets/worship.png' %})"></div>
+    <div class="hero-bg next" id="bgB" style="background-image:url({% static 'assets/congregation.png' %})"></div>
+    <div class="hero-gradient"></div>
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+
+    <div class="container text-center position-relative">
+      <img class="logo mb-3" src="{% static 'assets/LOT-LOGO-PNG-WHITE-2.png' %}" alt="Layers of Truth" />
+      <h1 class="brand mb-2">Layers of Truth</h1>
+      <p class="sub mb-0">Live Service Audio Stream</p>
+    </div>
+  </div>
+</header>
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="player-card p-3 p-md-4 reveal" id="playerCard">
+        <div class="np mb-3" aria-live="polite">
+          <img id="npArt" class="np-art" alt="Artwork" src="{% static 'assets/gatherings-flyer.png' %}" />
+          <div class="flex-grow-1">
+            <p class="np-title" id="npTitle"><span>Connecting…</span></p>
+            <p class="np-artist" id="npArtist"><span class="live-dot">Live stream</span></p>
+          </div>
+          <div class="d-flex gap-2">
+            <button id="shareBtn" class="btn btn-soft btn-sm"><i class="bi bi-share"></i> Share</button>
+            <a class="btn btn-brand btn-sm" href="{% static 'assets/gatherings-flyer.png' %}" target="_blank" rel="noopener"><i class="bi bi-image"></i> Artwork</a>
+          </div>
+        </div>
+        <div class="player-stage reveal" id="playerStage" style="width: 100%;">
+          <div id="rcPlayer">
+            <!-- IMPORTANT: no defer, script lives INSIDE the container -->
+            <script src="https://embed.radio.co/player/0810c7a.js"></script>
+          </div>
+        </div>
+
+        <p class="small text-center mt-3" style="color:var(--muted)">
+          If the player doesn’t start, tap the play button or check your device’s sound settings.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <section class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-center social">
+      <a class="website" href="https://layersoftruth.org/" target="_blank" rel="noopener"><i class="bi bi-globe"></i> Website</a>
+      <a class="youtube" href="https://www.youtube.com/@layersoftruth_ng" target="_blank" rel="noopener"><i class="bi bi-youtube"></i> YouTube</a>
+      <a class="instagram" href="https://www.instagram.com/layersoftruth_ng/" target="_blank" rel="noopener"><i class="bi bi-instagram"></i> Instagram</a>
+      <a class="facebook" href="https://www.facebook.com/layersoftruthng/" target="_blank" rel="noopener"><i class="bi bi-facebook"></i> Facebook</a>
+      <a class="twitter" href="https://x.com/Layers_of_Truth" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i> X</a>
+    </div>
+  </section>
+
+  <section class="mt-5">
+    <h2 class="h5 text-center mb-3 reveal">Moments from Worship</h2>
+    <div class="gallery">
+      <figure class="tile tall"><img src="{% static 'assets/worship.png' %}" alt="Worship moment" loading="lazy"></figure>
+      <figure class="tile wide"><img src="{% static 'assets/congregation.png' %}" alt="Congregation worshipping" loading="lazy"></figure>
+      <figure class="tile"><img src="{% static 'assets/congregation2.jpeg' %}" alt="Service gathering 1" loading="lazy"></figure>
+      <figure class="tile"><img src="{% static 'assets/gatherings-flyer.png' %}" alt="Service times flyer" loading="lazy"></figure>
+    </div>
+  </section>
+</main>
+
+
+
+
+</div>
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox"><img alt=""></div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  // Share
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    const url = location.href;
+    const text = 'Join the Layers of Truth live stream: ' + url;
+    if (navigator.share) navigator.share({ title: document.title, text, url });
+    else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  });
+
+  // Background slideshow (crossfade)
+  const slides = [
+    "{% static 'assets/worship.png' %}",
+    "{% static 'assets/congregation.png' %}",
+    "{% static 'assets/congregation2.jpeg' %}"
+  ];
+  let ix = 0;
+  const bgA = document.getElementById('bgA'), bgB = document.getElementById('bgB');
+  setInterval(()=> {
+    ix = (ix + 1) % slides.length;
+    const next = (bgA.style.opacity === '0') ? bgA : bgB;
+    const cur  = (next === bgA) ? bgB : bgA;
+    next.style.backgroundImage = `url('${slides[ix]}')`;
+    next.style.opacity = '1';
+    cur.style.opacity = '0';
+  }, 7000);
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries)=>{
+    for(const e of entries){
+      if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); }
+    }
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal,.tile').forEach(el=> io.observe(el));
+
+  // Player card 3D tilt
+  const card = document.getElementById('playerCard');
+  card.addEventListener('mousemove', (e)=>{
+    const r = card.getBoundingClientRect();
+    const rx = ((e.clientY - r.top)/r.height - .5) * -8;
+    const ry = ((e.clientX - r.left)/r.width - .5) * 8;
+    card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  }, {passive:true});
+  card.addEventListener('mouseleave', ()=> card.style.transform = '');
+
+  // Lightbox
+  const lb = document.getElementById('lightbox');
+  document.querySelectorAll('.gallery .tile img').forEach(img=>{
+    img.addEventListener('click', ()=>{ lb.querySelector('img').src = img.src; lb.classList.add('open'); })
+  });
+  lb.addEventListener('click', ()=> lb.classList.remove('open'));
+
+  // Now Playing via Radio.co public status
+  const STATUS_URL = 'https://public.radio.co/stations/s1702795f8/status';
+  const art = document.getElementById('npArt');
+  const titleEl = document.getElementById('npTitle');
+  const artistEl = document.getElementById('npArtist');
+  const mini = document.getElementById('mini');
+  const miniArt = document.getElementById('miniArt');
+  const miniTitle = document.getElementById('miniTitle');
+
+  function validText(s){
+    if (!s) return false;
+    return !/[\uFFFD]/.test(s) && s.trim().toLowerCase() !== 'png';
+  }
+  function marqueeIfNeeded(){
+    const span = titleEl.querySelector('span');
+    titleEl.classList.remove('marquee');
+    // small delay to read sizes after content change
+    requestAnimationFrame(()=>{
+      if(span.scrollWidth > titleEl.clientWidth+10){ titleEl.classList.add('marquee'); }
+    });
+  }
+
+  async function loadNowPlaying(){
+    try{
+      const res = await fetch(STATUS_URL, { cache: 'no-store' });
+      const data = await res.json();
+      const a = (data?.current_track?.artwork_url) || data?.artwork_url || '';
+      if (a){ art.src = a; miniArt.src = a; }
+
+      const t = data?.current_track?.title || '';
+      const r = data?.current_track?.artist || '';
+      titleEl.innerHTML = `<span>${ validText(t) ? t : 'Live Service' }</span>`;
+      artistEl.innerHTML = validText(r) ? r : '<span class="live-dot">Live stream</span>';
+      miniTitle.textContent = validText(t) ? t : 'Live Service';
+      marqueeIfNeeded();
+    } catch(e){
+      titleEl.innerHTML = '<span>Live Service</span>';
+      artistEl.innerHTML = '<span class="live-dot">Live stream</span>';
+      miniTitle.textContent = 'Live Service';
+    }
+  }
+  loadNowPlaying();
+  setInterval(loadNowPlaying, 15000);
+
+  // Sticky mini-player on scroll
+  let miniShown = false;
+  const showAt = 360;
+  window.addEventListener('scroll', ()=>{
+    const y = window.scrollY || document.documentElement.scrollTop;
+    if(y > showAt && !miniShown){ mini.classList.add('show'); miniShown = true; }
+    else if(y <= showAt && miniShown){ mini.classList.remove('show'); miniShown = false; }
+  }, {passive:true});
+</script>
+{% endblock %}

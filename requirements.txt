@@ -1,0 +1,7 @@
+asgiref==3.9.1
+Django==5.2.5
+mutagen==1.47.0
+pillow==11.3.0
+sqlparse==0.5.3
+tzdata==2025.2
+whitenoise==6.9.0

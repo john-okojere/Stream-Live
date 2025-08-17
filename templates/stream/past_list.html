@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %} 
+<style>
+/* Past Streams — grid & cards */
+.sermon-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:14px;
+}
+@media (min-width: 576px){ .sermon-grid{ gap:16px } }
+@media (min-width: 768px){ .sermon-grid{ gap:18px } }
+
+/* 1 col on mobile, 2 cols >= md */
+.sermon-card{
+  grid-column:span 12;
+  display:flex; gap:14px;
+  border:1px solid var(--ring);
+  border-radius:1rem;
+  background:var(--glass);
+  backdrop-filter:saturate(160%) blur(8px);
+  box-shadow:0 10px 24px rgba(0,0,0,.25);
+  padding:14px;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+@media (min-width: 768px){ .sermon-card{ grid-column:span 6; padding:16px; gap:16px } }
+.sermon-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+  border-color:rgba(255,255,255,.18);
+}
+
+.sermon-media{ flex:0 0 auto }
+.sermon-cover{
+  width:72px; height:72px; border-radius:.8rem; object-fit:cover; background:#202a3f;
+  box-shadow:0 0 0 1px rgba(255,255,255,.05) inset;
+}
+@media (min-width: 768px){ .sermon-cover{ width:80px; height:80px } }
+
+.sermon-body{ flex:1 1 auto; min-width:0 }
+
+/* Title link */
+.sermon-title{
+  display:inline-block;
+  color:#000; text-decoration:none; font-weight:800; letter-spacing:.2px;
+  line-height:1.2; margin-top:2px; margin-bottom:6px;
+}
+.sermon-title:hover{ text-decoration:underline; text-underline-offset:3px }
+
+/* Meta row */
+.sermon-meta{
+  display:flex; flex-wrap:wrap; gap:10px 14px;
+  color:var(--muted); font-size:.925rem;
+  margin-bottom:8px;
+}
+.meta-item{ display:inline-flex; align-items:center; gap:.35rem; }
+
+/* Tags */
+.sermon-tags{
+  display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;
+}
+.tag-chip{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.25rem .55rem;
+  border-radius:999px;
+  border:1px solid var(--ring);
+  background:#0b1222;
+  color:#e6edf3;
+  font-weight:600; font-size:.8rem;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset;
+}
+
+/* Actions */
+.sermon-actions{ display:flex; gap:8px; }
+.sermon-actions .btn i{ margin-right:.25rem; }
+
+/* Reveal animation */
+.reveal{ transform:translateY(12px); opacity:0; transition:transform .5s ease, opacity .5s }
+.reveal.show{ transform:none; opacity:1 }
+
+/* Pagination */
+.pager{
+  display:flex; justify-content:center; gap:.5rem; margin-top:16px;
+}
+.pager .page-link{
+  border:1px solid var(--ring); background:#0b1222; color:#e6edf3;
+}
+.pager .active .page-link{
+  background:linear-gradient(90deg, var(--brand), var(--brand-2)); border:0; color:#fff;
+}
+</style>
+{% endblock head %}
+
+{% block title %}Past Streams | Layers of Truth{% endblock %}
+
+{% block content %}
+<main class="container py-5">
+  <header class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+    <div>
+      <h1 class="h3 m-0">Past Streams</h1>
+      <p class="text-secondary m-0" style="color:var(--muted)!important">Listen back to recent services & messages.</p>
+    </div>
+    {% if request.user.is_staff %}
+      <a href="{% url 'stream:upload_sermon' %}" class="btn btn-brand btn-sm">
+        <i class="bi bi-upload"></i> Upload
+      </a>
+    {% endif %}
+  </header>
+
+  {% static 'assets/gatherings-flyer.png' as fallback_cover %}
+
+  {% if sermons %}
+    <div class="sermon-grid">
+      {% for s in sermons %}
+      <article class="sermon-card reveal">
+        <div class="sermon-media">
+          <img
+            class="sermon-cover"
+            src="{% if s.cover %}{{ s.cover.url }}{% else %}{{ fallback_cover }}{% endif %}"
+            alt="Cover for {{ s.title|default:'sermon' }}"
+            loading="lazy" width="80" height="80">
+        </div>
+
+        <div class="sermon-body">
+          <a class="sermon-title" href="{{ s.get_absolute_url }}">{{ s.title }}</a>
+
+          <div class="sermon-meta">
+            {% if s.speaker %}<span class="meta-item"><i class="bi bi-person"></i> {{ s.speaker }}</span>{% endif %}
+            <span class="meta-item"><i class="bi bi-calendar3"></i> <time datetime="{{ s.date|date:'Y-m-d' }}">{{ s.date|date:"M j, Y" }}</time></span>
+            {% if s.duration_s %}<span class="meta-item"><i class="bi bi-clock"></i> {{ s.duration_hm }}</span>{% endif %}
+          </div>
+
+          {% if s.tags_list %}
+          <div class="sermon-tags">
+            {% for tag in s.tags_list %}
+              <span class="tag-chip">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="sermon-actions">
+            <a href="{{ s.get_absolute_url }}" class="btn btn-brand btn-sm" aria-label="Play {{ s.title }}"><i class="bi bi-play-fill"></i> Play</a>
+            {% if s.audio %}<a href="{{ s.audio.url }}" class="btn btn-soft btn-sm" download aria-label="Download {{ s.title }}"><i class="bi bi-download"></i> Download</a>{% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    {# Optional pagination (works if your view provides page_obj) #}
+    {% if is_paginated or page_obj %}
+    <nav class="pager" aria-label="Past streams pages">
+      {% if page_obj.has_previous %}
+        <a class="page-link btn btn-sm" href="?page={{ page_obj.previous_page_number }}" rel="prev">&laquo; Prev</a>
+      {% endif %}
+      <span class="active"><span class="page-link btn btn-sm disabled">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></span>
+      {% if page_obj.has_next %}
+        <a class="page-link btn btn-sm" href="?page={{ page_obj.next_page_number }}" rel="next">Next &raquo;</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="player-card p-4 text-center" style="border:1px solid var(--ring);border-radius:1rem;background:var(--glass);backdrop-filter:saturate(160%) blur(8px);">
+      <p class="text-secondary m-0" style="color:var(--muted)!important">No uploads yet.</p>
+      {% if request.user.is_staff %}
+      <div class="mt-3">
+        <a href="{% url 'stream:upload_sermon' %}" class="btn btn-brand btn-sm"><i class="bi bi-upload"></i> Upload your first stream</a>
+      </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Reveal on scroll
+  (function(){
+    const els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window) || !els.length){
+      els.forEach(el => el.classList.add('show'));
+      return;
+    }
+    const io = new IntersectionObserver((entries, obs)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('show'); obs.unobserve(e.target); }
+      });
+    }, {threshold:.12});
+    els.forEach(el => io.observe(el));
+  })();
+</script>
+{% endblock %}

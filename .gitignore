@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.py.class
+
+# Django Migrations
+**/migrations/
+!**/migrations/__init__.py
+
+# Virtual Environments
+env/
+venv/
+ENV/
+.venv/
+.ENV/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS Generated
+.DS_Store
+Thumbs.db
+
+# Logs & local stuff
+*.log
+*.pot
+*.mo
+*.sqlite3
+db.sqlite3
+
+# MySQL dumps
+*.sql
+
+# Media & Static (Optional if generated dynamically)
+media/
+staticfiles/
+static/
+
+# Secrets & Configs
+.env
+.env.local
+*.bak
+*.tmp
+
+# Coverage & Testing
+htmlcov/
+.tox/
+.coverage
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+
+# PyCharm
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# pip-tools
+*.txt~
+requirements-*.txt
+
+# Others
+*.swp
+*.swo
