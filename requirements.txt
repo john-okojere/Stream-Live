@@ -1,7 +1,17 @@
 asgiref==3.9.1
+boto3==1.40.11
+botocore==1.40.11
 Django==5.2.5
+django-storages==1.14.6
+jmespath==1.0.1
 mutagen==1.47.0
 pillow==11.3.0
+PyMySQL==1.1.1
+python-dateutil==2.9.0.post0
+python-decouple==3.8
+s3transfer==0.13.1
+six==1.17.0
 sqlparse==0.5.3
 tzdata==2025.2
+urllib3==2.5.0
 whitenoise==6.9.0
