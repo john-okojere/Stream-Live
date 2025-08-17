@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import RegexValidator
 import uuid
+from .manager import UserManager
+
 from django.urls import reverse
 import os
 
@@ -90,17 +92,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
 
+    objects = UserManager()
 
     def full_name(self):
         return f'{self.last_name} {self.first_name}'
-    
-    
- 
-    def save(self, *args, **kwargs):
-        self.qr_code()
        
-        return super().save(*args, **kwargs)
-    
     def get_absolute_url(self):
         return reverse("profile", kwargs={"uid": self.uid}) 
     
