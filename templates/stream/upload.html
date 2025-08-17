@@ -5,20 +5,19 @@
 
 {% block head %}
 <style>
-  /* Page-specific polish */
+  /* Layout + cards */
   .upload-header p{ color:var(--muted); margin:0 }
   .form-pane, .files-pane{
     border:1px solid var(--ring);
     border-radius:1rem;
     background:var(--glass);
     backdrop-filter:saturate(160%) blur(8px);
-    box-shadow:0 10px 24px rgba(0,0,0,.25);
   }
   .form-pane .form-group{ margin-bottom:14px }
   .form-pane label{ font-weight:700; margin-bottom:.35rem }
   .help-text{ color:var(--muted); font-size:.9rem }
 
-  /* Make default Django fields look “Bootstrap-ish” without extra deps */
+  /* Inputs */
   .form-pane input[type="text"],
   .form-pane input[type="date"],
   .form-pane textarea{
@@ -27,7 +26,7 @@
   }
   .form-pane textarea{ min-height:120px; resize:vertical }
 
-  /* Error styling */
+  /* Errors */
   .errorlist{ list-style:none; padding-left:0; margin:.35rem 0 0 0 }
   .errorlist li{
     background:#5a161b; color:#ffd2d6; border:1px solid #732027;
@@ -43,7 +42,6 @@
   }
   .dz:hover{ border-color:rgba(255,255,255,.45) }
   .dz.is-dragover{ background:rgba(255,255,255,.06); border-color:#fff }
-
   .dz-title{ display:flex; align-items:center; gap:.5rem; font-weight:800 }
   .dz-sub{ color:var(--muted); font-size:.9rem; margin:0 }
   .dz-preview{ margin-top:.75rem; display:flex; gap:.75rem; align-items:center }
@@ -52,7 +50,11 @@
   }
   .dz-audio audio{ width:100%; height:36px }
 
-  .page-actions{ display:flex; gap:.6rem; flex-wrap:wrap }
+  /* Progress UI */
+  #uploadWrap{ display:none; }
+  #uploadWrap.is-visible{ display:block; }
+  .progress { height:10px; background: rgba(255,255,255,.08); }
+  .progress-bar { font-size:.75rem; }
 </style>
 {% endblock %}
 
@@ -63,17 +65,16 @@
       <h1 class="h3 m-0">Upload Past Stream</h1>
       <p>Add title and details on the left, then drop your cover and audio on the right.</p>
     </div>
-    <div class="page-actions">
+    <div class="page-actions d-flex gap-2">
       <a class="btn btn-soft btn-sm" href="{% url 'stream:past_list' %}"><i class="bi bi-arrow-left"></i> Back</a>
     </div>
   </div>
 
-  {# Show non-field errors, if any #}
   {% if form.non_field_errors %}
     <div class="alert alert-danger">{{ form.non_field_errors }}</div>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data">
+  <form id="uploadForm" method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
 
     <div class="row g-3">
@@ -111,17 +112,13 @@
             {{ form.tags.errors }}
             <div class="help-text">Comma-separated (e.g. <em>faith, worship, prayer</em>)</div>
           </div>
-
-          <div class="mt-3">
-            <button class="btn btn-brand"><i class="bi bi-save"></i> Save</button>
-          </div>
         </div>
       </div>
 
       <!-- Right: files -->
       <div class="col-lg-5">
         <div class="files-pane p-3 p-md-4">
-          <!-- Keep Django’s original inputs (hidden) so validation works -->
+          <!-- Keep Django file inputs (hidden) so validation & names work -->
           <div class="d-none">
             {{ form.cover }} {{ form.cover.errors }}
             {{ form.audio }} {{ form.audio.errors }}
@@ -143,7 +140,6 @@
             </div>
           </section>
 
-          <!-- Spacer -->
           <div style="height:12px"></div>
 
           <!-- Audio dropzone -->
@@ -153,7 +149,7 @@
             <div class="dz-preview dz-audio" id="audioPreview">
               <div class="flex-grow-1">
                 <div class="small" style="color:var(--muted)">
-                  <div id="audioName">No file selected</div>
+                  <div id="audioName" style="white-space:wrap;width:350px;overflow:hidden;">No file selected</div>
                   <div id="audioMeta"></div>
                 </div>
                 <audio id="audioPlayer" controls style="margin-top:.35rem;"></audio>
@@ -164,8 +160,30 @@
             </div>
           </section>
 
-          <div class="mt-3">
-            <button class="btn btn-brand w-100"><i class="bi bi-cloud-arrow-up"></i> Save & Upload</button>
+          <!-- Progress UI -->
+          <div id="uploadWrap" class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <strong id="uploadLabel">Uploading…</strong>
+              <span id="uploadPct" class="text-muted">0%</span>
+            </div>
+
+            <div class="progress">
+              <div id="uploadBar" class="progress-bar" role="progressbar" style="width:0%"></div>
+            </div>
+
+            <div class="d-flex justify-content-between small mt-2">
+              <span id="uploadBytes">0 / 0</span>
+              <span id="uploadSpeed">—</span>
+              <span id="uploadEta">ETA —</span>
+            </div>
+
+            <button id="cancelUpload" type="button" class="btn btn-link btn-sm mt-1 text-danger">
+              <i class="bi bi-x-circle"></i> Cancel
+            </button>
+          </div>
+
+          <div class="mt-3 d-grid">
+            <button id="submitBtn" class="btn btn-brand"><i class="bi bi-cloud-arrow-up"></i> Save & Upload</button>
           </div>
         </div>
       </div>
@@ -176,87 +194,206 @@
 
 {% block scripts %}
 <script>
-  // Utilities
-  function bytes(n){
-    if(!n && n !== 0) return "";
-    const u=['B','KB','MB','GB']; let i=0; while(n>=1024 && i<u.length-1){ n/=1024; i++; }
-    return n.toFixed(n>=1024?1:0)+' '+u[i];
-  }
-  function setDrag(el){
-    el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('is-dragover'); });
+(() => {
+  // ---------- helpers ----------
+  const $ = s => document.querySelector(s);
+  const bytes = n => {
+    if(n==null) return "";
+    const u=['B','KB','MB','GB','TB']; let i=0; while(n>=1024&&i<u.length-1){n/=1024;i++}
+    return n.toFixed(i?1:0)+' '+u[i];
+  };
+  const fmt = sec => { sec=Math.max(0,Math.round(sec||0)); const m=Math.floor(sec/60), s=sec%60, h=Math.floor(m/60);
+    return h?`${h}:${String(m%60).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`; };
+  const csrf = () => (document.querySelector('input[name="csrfmiddlewaretoken"]')||{}).value || '';
+  const setDrag = el => {
+    if(!el) return;
+    el.addEventListener('dragover', e=>{e.preventDefault(); el.classList.add('is-dragover')});
     ['dragleave','dragend','drop'].forEach(evt=> el.addEventListener(evt, ()=> el.classList.remove('is-dragover')));
-  }
+  };
 
-  // COVER
-  const dzCover = document.getElementById('dzCover');
-  const coverInput = document.getElementById('id_cover');   // from Django
-  const pickCover = document.getElementById('pickCover');
-  const coverThumb = document.getElementById('coverThumb');
-  const coverName = document.getElementById('coverName');
-  const coverSize = document.getElementById('coverSize');
-  setDrag(dzCover);
+  // ---------- elements ----------
+  const form = $('#uploadForm');
+  const submitBtn = $('#submitBtn');
 
+  // cover
+  const dzCover = $('#dzCover');
+  const coverInput = $('#id_cover');
+  const pickCover = $('#pickCover');
+  const coverThumb = $('#coverThumb');
+  const coverName = $('#coverName');
+  const coverSize = $('#coverSize');
+
+  // audio
+  const dzAudio = $('#dzAudio');
+  const audioInput = $('#id_audio');
+  const pickAudio = $('#pickAudio');
+  const audioName = $('#audioName');
+  const audioMeta = $('#audioMeta');
+  const audioPlayer = $('#audioPlayer');
+
+  // progress UI
+  const wrap = $('#uploadWrap');
+  const bar = $('#uploadBar');
+  const label = $('#uploadLabel');
+  const pct = $('#uploadPct');
+  const bytesEl = $('#uploadBytes');
+  const speedEl = $('#uploadSpeed');
+  const etaEl = $('#uploadEta');
+  const cancelBtn = $('#cancelUpload');
+
+  // defaults
+  coverInput?.setAttribute('accept','image/*');
+  audioInput?.setAttribute('accept','audio/*,audio/mpeg,audio/mp4');
+
+  // start hidden (CSS controls visibility)
+  wrap.classList.remove('is-visible');
+
+  // dnd
+  setDrag(dzCover); setDrag(dzAudio);
+
+  // previews
   function handleCover(file){
     if(!file) return;
     coverName.textContent = file.name;
     coverSize.textContent = bytes(file.size);
-    const ok = /^image\//.test(file.type);
-    if(ok){
+    if(/^image\//.test(file.type)){
       const r = new FileReader();
       r.onload = e => coverThumb.src = e.target.result;
       r.readAsDataURL(file);
     }
   }
-  pickCover.addEventListener('click', ()=> coverInput && coverInput.click());
-  dzCover.addEventListener('drop', (e)=>{
-    e.preventDefault();
-    const file = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(file){
-      // Put file into hidden Django input
-      const dt = new DataTransfer(); dt.items.add(file);
-      coverInput.files = dt.files;
-      handleCover(file);
-    }
-  });
-  if(coverInput){
-    coverInput.addEventListener('change', ()=> handleCover(coverInput.files[0]));
-  }
-
-  // AUDIO
-  const dzAudio = document.getElementById('dzAudio');
-  const audioInput = document.getElementById('id_audio');   // from Django
-  const pickAudio = document.getElementById('pickAudio');
-  const audioName = document.getElementById('audioName');
-  const audioMeta = document.getElementById('audioMeta');
-  const audioPlayer = document.getElementById('audioPlayer');
-  setDrag(dzAudio);
-
-  function formatDuration(sec){
-    sec = Math.round(sec||0);
-    const m = Math.floor(sec/60), s = sec%60, h = Math.floor(m/60);
-    return h ? `${h}:${String(m%60).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-             : `${m}:${String(s).padStart(2,'0')}`;
-  }
   function handleAudio(file){
     if(!file) return;
-    audioName.textContent = file.name + ' (' + bytes(file.size) + ')';
+    audioName.textContent = `${file.name} (${bytes(file.size)})`;
     audioPlayer.src = URL.createObjectURL(file);
-    audioPlayer.onloadedmetadata = ()=> {
-      audioMeta.textContent = 'Duration: ' + formatDuration(audioPlayer.duration||0);
-    };
+    audioPlayer.onloadedmetadata = () => audioMeta.textContent = 'Duration: ' + fmt(audioPlayer.duration||0);
   }
-  pickAudio.addEventListener('click', ()=> audioInput && audioInput.click());
-  dzAudio.addEventListener('drop', (e)=>{
+
+  pickCover?.addEventListener('click', ()=> coverInput?.click());
+  pickAudio?.addEventListener('click', ()=> audioInput?.click());
+  coverInput?.addEventListener('change', ()=> handleCover(coverInput.files[0]));
+  audioInput?.addEventListener('change', ()=> handleAudio(audioInput.files[0]));
+
+  dzCover?.addEventListener('drop', e=>{
     e.preventDefault();
-    const file = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(file){
-      const dt = new DataTransfer(); dt.items.add(file);
-      audioInput.files = dt.files;
-      handleAudio(file);
-    }
+    const f = e.dataTransfer.files?.[0]; if(!f) return;
+    const dt = new DataTransfer(); dt.items.add(f); coverInput.files = dt.files; handleCover(f);
   });
-  if(audioInput){
-    audioInput.addEventListener('change', ()=> handleAudio(audioInput.files[0]));
+  dzAudio?.addEventListener('drop', e=>{
+    e.preventDefault();
+    const f = e.dataTransfer.files?.[0]; if(!f) return;
+    const dt = new DataTransfer(); dt.items.add(f); audioInput.files = dt.files; handleAudio(f);
+  });
+
+  // ---------- upload state ----------
+  let xhr=null, phase='idle', lastLoaded=0, lastStamp=0, stallTimer=null;
+
+  function showWrap(){ wrap.classList.add('is-visible'); }
+  function hideWrap(){ wrap.classList.remove('is-visible'); }
+  function disableInputs(disabled){
+    [submitBtn,pickCover,pickAudio,coverInput,audioInput].forEach(el=> el && (el.disabled = disabled));
   }
+  function resetBar(){
+    bar.style.width='0%';
+    bar.className='progress-bar';
+    pct.textContent='0%'; bytesEl.textContent='0 / 0';
+    speedEl.textContent='—'; etaEl.textContent='ETA —';
+  }
+  function setPhase(next){
+    phase = next;
+    if(next==='upload'){
+      showWrap(); resetBar(); disableInputs(true);
+      label.textContent='Uploading…';
+      bar.classList.remove('bg-success','bg-danger','progress-bar-animated','progress-bar-striped');
+      cancelBtn.disabled=false;
+    } else if(next==='processing'){
+      label.textContent='Processing…';
+      pct.textContent='100%'; bar.style.width='100%';
+      bar.classList.add('progress-bar-striped','progress-bar-animated');
+      speedEl.textContent='—'; etaEl.textContent='—'; cancelBtn.disabled=true;
+    } else if(next==='done'){
+      label.textContent='Done';
+      bar.classList.remove('progress-bar-animated','progress-bar-striped');
+      bar.classList.add('bg-success');
+    } else if(next==='error'){
+      label.textContent='Error';
+      bar.classList.remove('progress-bar-animated','progress-bar-striped');
+      bar.classList.add('bg-danger');
+      disableInputs(false); cancelBtn.disabled=false;
+    }
+  }
+  function toProcessingGuard(){ if(phase==='upload') setPhase('processing'); }
+  function restartStallWatch(total, loaded){
+    clearTimeout(stallTimer);
+    const pc = total ? (loaded/total)*100 : 0;
+    if(pc>=99) stallTimer = setTimeout(()=> toProcessingGuard(), 1000);
+  }
+
+  cancelBtn?.addEventListener('click', ()=>{
+    if(xhr) xhr.abort();
+    disableInputs(false); hideWrap(); resetBar();
+  });
+
+  form?.addEventListener('submit', (e)=>{
+    e.preventDefault();
+
+    const action = form.getAttribute('action') || location.href;
+    const data = new FormData(form);
+
+    xhr = new XMLHttpRequest();
+    xhr.open('POST', action, true);
+    xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
+    const token = csrf(); if(token) xhr.setRequestHeader('X-CSRFToken', token);
+
+    // show on loadstart to avoid race
+    xhr.upload.addEventListener('loadstart', () => setPhase('upload'));
+
+    // progress
+    xhr.upload.addEventListener('progress', ev=>{
+      if(!ev.lengthComputable){ label.textContent='Uploading…'; return; }
+      const now = performance.now();
+      const p = Math.min(100, Math.round((ev.loaded/ev.total)*100));
+      bar.style.width = p+'%'; pct.textContent = p+'%';
+      bytesEl.textContent = `${bytes(ev.loaded)} / ${bytes(ev.total)}`;
+
+      if(lastStamp){
+        const dt = (now-lastStamp)/1000;
+        const dl = ev.loaded-lastLoaded;
+        const sp = dl/(dt||1);
+        speedEl.textContent = (sp/1048576).toFixed(2)+' MB/s';
+        const remain = (ev.total-ev.loaded)/(sp||1);
+        etaEl.textContent = 'ETA '+fmt(remain);
+      }
+      lastLoaded=ev.loaded; lastStamp=now;
+
+      if(p>=100) toProcessingGuard();
+      restartStallWatch(ev.total, ev.loaded);
+    });
+
+    // bytes finished sending
+    xhr.upload.addEventListener('loadend', toProcessingGuard);
+
+    // when server starts responding
+    xhr.addEventListener('readystatechange', ()=> { if(xhr.readyState>=2) toProcessingGuard(); });
+
+    // final result
+    xhr.addEventListener('load', ()=>{
+      clearTimeout(stallTimer);
+      if(xhr.status>=200 && xhr.status<400){
+        setPhase('done');
+        // If your view returns a redirect, responseURL will be the final URL:
+        location.href = xhr.responseURL || action;
+      } else {
+        setPhase('error');
+        alert('Upload failed ('+xhr.status+'). Please try again.');
+      }
+    });
+
+    xhr.addEventListener('error', ()=>{ clearTimeout(stallTimer); setPhase('error'); alert('Network error during upload.'); });
+    xhr.addEventListener('abort', ()=> clearTimeout(stallTimer));
+
+    xhr.send(data);
+  });
+})();
 </script>
 {% endblock %}

@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction, IntegrityError
 from django.utils.text import slugify
 from django.urls import reverse
 from datetime import datetime
@@ -25,26 +25,31 @@ class Sermon(models.Model):
         ordering = ["-date", "-id"]
 
     def save(self, *args, **kwargs):
-        # slug
+        # Prepare a base slug if missing
         if not self.slug:
-            base = slugify(self.title) or slugify(self.date.isoformat())
-            slug = base
-            i = 2
-            while Sermon.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base}-{i}"
-                i += 1
-            self.slug = slug
+            base = self._base_slug()
+            # keep room for suffixes like -123 (reserve up to 4 chars)
+            self.slug = base[:136]
 
-        # duration (best effort)
-        if self.audio and (not self.duration_s or self.duration_s == 0):
+        # Try saving; on collision, append/increment a suffix and retry
+        base = self._base_slug()
+        max_len = 140
+        attempt = 1
+        while True:
             try:
-                mf = MutagenFile(self.audio)
-                if mf and mf.info and mf.info.length:
-                    self.duration_s = int(mf.info.length)
-            except Exception:
-                pass
+                with transaction.atomic():
+                    return super().save(*args, **kwargs)
+            except IntegrityError:
+                attempt += 1
+                suffix = f"-{attempt}"
+                # rebuild from base each time (avoids doubling suffixes)
+                trimmed = base[: max_len - len(suffix)]
+                self.slug = f"{trimmed}{suffix}"
+                if attempt > 50:  # sanity cap
+                    raise
 
-        super().save(*args, **kwargs)
+    def _base_slug(self):
+        return slugify(self.title) or "sermon"
 
     def duration_hm(self):
         m, s = divmod(self.duration_s or 0, 60)
