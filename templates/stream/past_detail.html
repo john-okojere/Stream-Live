@@ -32,7 +32,7 @@ a.btn-line i{font-size:1rem}
 .card{border:1px solid var(--ring);border-radius:12px;background:#0b1222;padding:16px;margin-top:14px}
 
 /* ==== CD Player ==== */
-.player-wrap{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:center}
+.player-wrap{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:center;align-items: self-start;}
 @media(max-width:720px){.player-wrap{grid-template-columns:1fr}}
 
 .cd{--size:220px;--ring-bg:#182137;--progress:0deg;position:relative;width:var(--size);height:var(--size);margin-inline:auto}
@@ -58,6 +58,8 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
 .row-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .icon-btn{border:1px solid var(--ring);background:#0d1220;padding:.45rem .6rem;border-radius:8px;display:inline-flex;align-items:center;gap:.35rem}
 .icon-btn i{font-size:1rem}
+/* Active state for repeat toggle */
+.icon-btn.active{background:#182137;border-color:var(--brand, #4f46e5)}
 .btn-plain{border:1px solid var(--ring);background:#0d1220;padding:.4rem .55rem;border-radius:8px;font-weight:700;font-size:.9rem}
 .viz{display:flex;align-items:flex-end;gap:3px;height:14px}
 .viz span{width:3px;background:#2a3864;border-radius:2px;height:6px;transition:height .18s ease}
@@ -144,6 +146,10 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
             <input id="vol" type="range" min="0" max="1" step="0.01" value="1" style="width:120px">
           </div>
           <button class="icon-btn" id="shareBtn" aria-label="Share"><i class="bi bi-share"></i></button>
+          <!-- Repeat toggle -->
+          <button class="icon-btn" id="repeat" aria-label="Repeat" aria-pressed="false" title="Repeat off">
+            <i class="bi bi-arrow-repeat"></i>
+          </button>
           <div class="viz" id="viz"><span></span><span></span><span></span><span></span><span></span></div>
         </div>
 
@@ -303,6 +309,9 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
   const mCover = document.getElementById('mCover');
   const mK = document.getElementById('mK');
 
+  // NEW: repeat toggle
+  const repeat = document.getElementById('repeat');
+
   // Helpers
   function fmt(sec){
     if(!isFinite(sec)) return '0:00';
@@ -314,10 +323,18 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
     const icon = audio.paused ? 'bi-play-fill' : 'bi-pause-fill';
     pp.innerHTML = `<i class="bi ${icon}"></i>`;
     mToggle.innerHTML = `<i class="bi ${icon}"></i>`;
-    mK.textContent = audio.paused ? 'Paused' : 'Playing';
+    // show "• Repeat" when loop is on
+    mK.textContent = audio.paused ? 'Paused' : ('Playing' + (audio.loop ? ' • Repeat' : ''));
     document.title = (audio.paused ? '' : '▶ ') + hTitle.textContent + ' | Past Stream';
     cd.classList.toggle('playing', !audio.paused);
     viz.classList.toggle('playing', !audio.paused);
+
+    // reflect repeat button state
+    if (repeat){
+      repeat.classList.toggle('active', !!audio.loop);
+      repeat.setAttribute('aria-pressed', audio.loop ? 'true' : 'false');
+      repeat.title = audio.loop ? 'Repeat one' : 'Repeat off';
+    }
   }
   function updateDiscProgress(){
     const pct = (audio.currentTime && audio.duration) ? (audio.currentTime / audio.duration) : 0;
@@ -347,6 +364,17 @@ input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;b
   fwd.addEventListener('click',  ()=> audio.currentTime = Math.min(audio.duration||Infinity, audio.currentTime + 30));
   rate.addEventListener('change', ()=> audio.playbackRate = parseFloat(rate.value));
   vol.addEventListener('input', ()=> audio.volume = parseFloat(vol.value));
+
+  // NEW: Repeat click handler
+  if (repeat){
+    repeat.addEventListener('click', () => {
+      audio.loop = !audio.loop;
+      repeat.classList.toggle('active', audio.loop);
+      repeat.setAttribute('aria-pressed', audio.loop ? 'true' : 'false');
+      repeat.title = audio.loop ? 'Repeat one' : 'Repeat off';
+      mK.textContent = audio.paused ? 'Paused' : ('Playing' + (audio.loop ? ' • Repeat' : ''));
+    });
+  }
 
   // Seek
   seek.addEventListener('input', ()=>{ seek.dragging = true; });
