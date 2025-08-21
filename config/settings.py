@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize", 
     "stream.apps.StreamConfig",
     "user.apps.UserConfig",
+    "analytics.apps.AnalyticsConfig",
 
 ]
 
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "analytics.middleware.VisitMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -145,6 +147,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+ANALYTICS_STORE_IP = False 
+ANALYTICS_GEOIP = True                     # enable geo lookup
+ANALYTICS_GEOIP_DB_PATH = BASE_DIR / "geo/GeoLite2-City.mmdb"
 
 # Static & Media Files
 

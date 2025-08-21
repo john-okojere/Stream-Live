@@ -21,7 +21,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("analytics/", include("analytics.urls")),
     path("", include("stream.urls")),
+
 ]
 
 if settings.DEBUG:
