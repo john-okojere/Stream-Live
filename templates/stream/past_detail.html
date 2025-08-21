@@ -1,490 +1,214 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ sermon.title }} | Past Stream{% endblock %}
+{% block title %}{{ object.title }} — Layers of Truth{% endblock %}
+
+{% block meta %}
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <meta name="description" content="{{ object.description|striptags|truncatechars:160 }}">
+  {% if object.cover %}
+    <meta property="og:image" content="{{ object.cover.url }}">
+  {% endif %}
+  <meta property="og:title" content="{{ object.title }}">
+  <meta property="og:description" content="{{ object.description|striptags|truncatechars:160 }}">
+  <meta property="og:type" content="music.song">
+{% endblock %}
 
 {% block head %}
 <style>
-/* ==== Flat + conceptual ==== */
-.page-wrap{max-width:980px;margin:0 auto}
-
-/* Header */
-.header{
-  display:flex; align-items:center; gap:14px;
-  border:1px solid var(--ring); border-radius:12px;
-  background:#0b1222; padding:12px 14px;
-}
-@media screen and (max-width:760px) {
-  .header{
-    flex-direction: column;
+  .hero {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background:
+      radial-gradient(800px 500px at 10% -10%, rgba(123,140,255,.20), transparent 40%),
+      radial-gradient(800px 600px at 120% 0%, rgba(210,72,255,.12), transparent 42%),
+      #0b1222;
+    min-height: 260px;
   }
-}
-.btn-line{color: #fff !important;}
-.header .cover{width:64px;height:64px;border-radius:10px;object-fit:cover}
-.header .title{margin:0;font-weight:800;line-height:1.2}
-.header .meta{color:var(--muted);display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:2px;font-size:.95rem}
-.meta i{margin-right:.3rem}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-a.btn-line{border:1px solid var(--ring);background:#0d1220;border-radius:10px;padding:.5rem .75rem;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
-a.btn-line i{font-size:1rem}
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    {% if object.cover %}
+      background-image: url('{{ object.cover.url }}');
+      background-size: cover; background-position: center;
+      filter: blur(18px) saturate(1.1) brightness(.6);
+      transform: scale(1.08);
+    {% else %}
+      background: linear-gradient(135deg,#10182e,#0b1222);
+    {% endif %}
+  }
+  .hero-overlay{
+    position:relative; z-index:1;
+    padding: 1.25rem;
+    background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.45));
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+  }
+  .hero-img{
+    width: 180px; height: 180px; object-fit: cover; border-radius: 14px;
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    background:#111;
+  }
+  .meta{ color:#a8b3c7 }
+  .tag-pill{
+    display:inline-block; padding:.2rem .55rem; margin:.2rem .25rem 0 0;
+    border-radius:999px; font-size:.75rem; color:#a8b3c7;
+    border:1px dashed rgba(255,255,255,.18);
+  }
+  .btn-soft{
+    background: rgba(255,255,255,.06); color:#e6edf3; border:1px solid rgba(255,255,255,.12);
+  }
+  .btn-soft:hover{ background: rgba(255,255,255,.12); }
 
-/* Card */
-.card{border:1px solid var(--ring);border-radius:12px;background:#0b1222;padding:16px;margin-top:14px}
-
-/* ==== CD Player ==== */
-.player-wrap{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:center;align-items: self-start;}
-@media(max-width:720px){.player-wrap{grid-template-columns:1fr}}
-
-.cd{--size:220px;--ring-bg:#182137;--progress:0deg;position:relative;width:var(--size);height:var(--size);margin-inline:auto}
-.cd .disc{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--brand) 0deg,var(--brand) var(--progress),var(--ring-bg) var(--progress));display:grid;place-items:center;border:1px solid var(--ring)}
-.cd .art{width:calc(var(--size) - 18px);height:calc(var(--size) - 18px);border-radius:50%;overflow:hidden;display:block;position:relative;background:#101828;border:1px solid var(--ring);animation:spin 10s linear infinite;animation-play-state:paused}
-.cd.playing .art{animation-play-state:running}
-.cd .art img{width:100%;height:100%;object-fit:cover;display:block}
-.cd .art::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);background:#0b1222;border:1px solid var(--ring)}
-.tonearm{position:absolute;width:120px;height:4px;right:-10px;top:18px;background:#1a2442;transform-origin:90% 50%;transform:rotate(-24deg);border:1px solid var(--ring);border-radius:4px;transition:transform .35s ease}
-.cd.playing .tonearm{transform:rotate(-16deg)}
-.tonearm::after{content:"";position:absolute;right:-6px;top:-3px;width:10px;height:10px;border-radius:2px;background:#1a2442;border:1px solid var(--ring)}
-.cd .tap{position:absolute;inset:0;border-radius:50%;cursor:pointer;background:transparent}
-
-/* Transport */
-.trans{display:grid;row-gap:10px}
-.bar{display:flex;align-items:center;gap:10px}
-.time{min-width:60px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.95rem;text-align:left}
-input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:transparent;cursor:pointer}
-input[type="range"]::-webkit-slider-runnable-track{height:6px;background:#182137;border-radius:999px}
-input[type="range"]::-moz-range-track{height:6px;background:#182137;border-radius:999px}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #182137}
-input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #182137}
-.row-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.icon-btn{border:1px solid var(--ring);background:#0d1220;padding:.45rem .6rem;border-radius:8px;display:inline-flex;align-items:center;gap:.35rem}
-.icon-btn i{font-size:1rem}
-/* Active state for repeat toggle */
-.icon-btn.active{background:#182137;border-color:var(--brand, #4f46e5)}
-.btn-plain{border:1px solid var(--ring);background:#0d1220;padding:.4rem .55rem;border-radius:8px;font-weight:700;font-size:.9rem}
-.viz{display:flex;align-items:flex-end;gap:3px;height:14px}
-.viz span{width:3px;background:#2a3864;border-radius:2px;height:6px;transition:height .18s ease}
-.playing .viz span:nth-child(odd){height:14px}
-.playing .viz span:nth-child(3n){height:10px}
-
-.desc{color:var(--muted);margin-top:12px}
-
-/* ==== Suggestions rail ==== */
-.rail{margin-top:22px}
-.rail h2{font-size:1.05rem;font-weight:800;margin:0 0 10px}
-.tracks{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-@media(min-width:768px){.tracks{gap:14px}}
-.track{grid-column:span 12;border:1px solid var(--ring);border-radius:12px;background:#0b1222;padding:10px;display:flex;gap:10px;align-items:center}
-@media(min-width:768px){.track{grid-column:span 6}}
-.track .c{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:0 0 auto}
-.track .t{font-weight:700;line-height:1.2;margin:0}
-.track .m{color:var(--muted);font-size:.9rem}
-.track .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.q-btn{border:1px solid var(--ring);background:#0d1220;padding:.35rem .55rem;border-radius:8px;display:inline-flex;align-items:center;gap:.35rem;font-size:.9rem}
-.q-time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;margin-left:auto}
-.q-audio{display:none} /* managed by JS */
-
-/* micro sticky */
-.micro{position:fixed;left:12px;right:12px;bottom:12px;z-index:50;border:1px solid var(--ring);background:#0b1222;border-radius:12px;display:flex;align-items:center;gap:10px;padding:8px 10px;transform:translateY(140%);opacity:0;transition:transform .3s ease,opacity .3s ease}
-.micro.show{transform:none;opacity:1}
-.micro img{width:28px;height:28px;border-radius:6px;object-fit:cover}
-.micro .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.95rem}
-.micro .k{color:var(--muted);font-size:.85rem}
-
-@keyframes spin{to{transform:rotate(360deg)}}
+  /* subtle motion under the title */
+  .wavebar{
+    height: 4px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.12);
+    position: relative; margin-top:.5rem;
+  }
+  .wavebar::after{
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(90deg, rgba(123,140,255,.0), rgba(123,140,255,.6), rgba(210,72,255,.0));
+    transform: translateX(-100%);
+    animation: wave 2.4s ease-in-out infinite;
+  }
+  @keyframes wave { 0%{ transform:translateX(-100%) } 50%{ transform:translateX(0%) } 100%{ transform:translateX(100%) } }
 </style>
 {% endblock %}
 
 {% block content %}
-<main class="container py-5 page-wrap">
-  {% static 'assets/gatherings-flyer.png' as fallback_cover %}
-
-  <!-- Header -->
-  <section class="header">
-    <img id="hCover" class="cover" src="{% if sermon.cover %}{{ sermon.cover.url }}{% else %}{{ fallback_cover }}{% endif %}" alt="Cover">
-    <div class="flex-grow-1">
-      <h1 id="hTitle" class="title h4" style="color: #fff;">{{ sermon.title }}</h1>
-      <div class="meta">
-        {% if sermon.speaker %}<span><i class="bi bi-person"></i><span id="hSpeaker">{{ sermon.speaker }}</span></span>{% else %}<span id="hSpeaker" hidden></span>{% endif %}
-        <span><i class="bi bi-calendar3"></i><time id="hDate" datetime="{{ sermon.date|date:'Y-m-d' }}">{{ sermon.date|date:"M j, Y" }}</time></span>
-        {% if sermon.duration_s %}<span><i class="bi bi-clock"></i><span id="hDur">{{ sermon.duration_hm }}</span></span>{% else %}<span id="hDur" hidden></span>{% endif %}
-      </div>
-    </div>
-    <div class="actions">
-      <a id="dl" href="{{ sermon.audio.url }}" class="btn-line" download><i class="bi bi-download"></i>Download</a>
-      <a href="{% url 'stream:past_list' %}" class="btn-line"><i class="bi bi-arrow-left"></i>Back</a>
-    </div>
-  </section>
-
-  <!-- Player -->
-  <section class="card">
-    <audio id="audio" preload="metadata">
-      <source src="{{ sermon.audio.url }}">
-    </audio>
-
-    <div class="player-wrap">
-      <!-- CD -->
-      <div class="cd" id="cd">
-        <div class="disc" id="disc">
-          <div class="art" id="art"><img id="artImg" src="{% if sermon.cover %}{{ sermon.cover.url }}{% else %}{{ fallback_cover }}{% endif %}" alt=""></div>
+<div class="container py-4">
+  <div class="hero mb-4">
+    <div class="hero-overlay">
+      <div class="row g-4 align-items-center">
+        <div class="col-auto">
+          {% if object.cover %}
+            <img class="hero-img" src="{{ object.cover.url }}" alt="{{ object.title }}">
+          {% else %}
+            <div class="hero-img d-flex align-items-center justify-content-center">
+              <i class="bi bi-music-note-beamed fs-1 text-muted"></i>
+            </div>
+          {% endif %}
         </div>
-        <div class="tonearm"></div>
-        <button class="tap" id="tap" aria-label="Play/Pause"></button>
-      </div>
 
-      <!-- Transport -->
-      <div class="trans">
-        <div class="row-controls">
-          <button class="icon-btn" id="pp" aria-label="Play"><i class="bi bi-play-fill"></i></button>
-          <button class="icon-btn" id="back" aria-label="Seek back 15s"><i class="bi bi-skip-backward"></i><span>-15</span></button>
-          <button class="icon-btn" id="fwd" aria-label="Seek forward 30s"><i class="bi bi-skip-forward"></i><span>+30</span></button>
-          <select class="btn-plain" id="rate" aria-label="Speed">
-            <option value="0.8">0.8×</option><option value="1" selected>1×</option>
-            <option value="1.25">1.25×</option><option value="1.5">1.5×</option>
-            <option value="1.75">1.75×</option><option value="2">2×</option>
-          </select>
-          <div class="icon-btn" style="gap:10px"><i class="bi bi-volume-up"></i>
-            <input id="vol" type="range" min="0" max="1" step="0.01" value="1" style="width:120px">
+        <div class="col">
+          <h1 class="h3 mb-1">{{ object.title }}</h1>
+          <div class="meta mb-2">
+            {{ object.speaker }} • {{ object.date|date:"M j, Y" }} • {{ object.duration_hm }}
           </div>
-          <button class="icon-btn" id="shareBtn" aria-label="Share"><i class="bi bi-share"></i></button>
-          <!-- Repeat toggle -->
-          <button class="icon-btn" id="repeat" aria-label="Repeat" aria-pressed="false" title="Repeat off">
-            <i class="bi bi-arrow-repeat"></i>
-          </button>
-          <div class="viz" id="viz"><span></span><span></span><span></span><span></span><span></span></div>
-        </div>
+          {% if object.tags_list %}
+            <div class="mb-2">
+              {% for t in object.tags_list %}
+                <span class="tag-pill">#{{ t }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <button class="btn btn-primary js-play-now" data-slug="{{ object.slug }}">
+              <i class="bi bi-play-fill"></i> Play now
+            </button>
+            <button class="btn btn-soft js-add-queue" data-slug="{{ object.slug }}">
+              <i class="bi bi-plus-lg"></i> Add to queue
+            </button>
 
-        <div class="bar">
-          <div class="time" id="tCur">0:00</div>
-          <input id="seek" type="range" min="0" value="0" step="0.01" aria-label="Seek">
-          <div class="time" id="tDur">0:00</div>
-        </div>
+            {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'stream:library_toggle' %}" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="slug" value="{{ object.slug }}">
+              <button class="btn btn-soft" type="submit"><i class="bi bi-bookmark-plus"></i> Save</button>
+            </form>
+            {% endif %}
 
-        {% if sermon.description %}
-          <p class="desc">{{ sermon.description|linebreaksbr }}</p>
-        {% endif %}
+            <a href="{{ object.audio.url }}" class="btn btn-soft">
+              <i class="bi bi-download"></i> Download
+            </a>
+            <button class="btn btn-soft" id="copyLinkBtn" data-url="{{ request.build_absolute_uri }}">
+              <i class="bi bi-link-45deg"></i> Copy link
+            </button>
+          </div>
+
+          <div class="wavebar" aria-hidden="true"></div>
+        </div>
       </div>
-    </div>
-  </section>
-<style>
-/* Light card look (flat, crisp) */
-.item--light{
-  display:grid; grid-template-columns:auto 1fr auto;
-  gap:12px; align-items:center;
-  background:#fff; color:#0f172a;
-  border:1px solid #e5e7eb; border-radius:12px; padding:12px;
-}
-.item--light .c{
-  width:60px; height:100px; border-radius:10px; object-fit:cover; background:#eef2f7;
-  border:1px solid #e5e7eb;
-}
-.item--light .t{
-  color:#0f172a; text-decoration:none; font-weight:800; line-height:1.2; display:inline-block;
-}
-.item--light .t:hover{ text-decoration:underline; text-underline-offset:3px }
-.item--light .m{ color:#6b7280; font-size:.92rem; margin-top:2px }
-
-/* Buttons */
-.btn-min{
-  border:1px solid #e5e7eb; background:#fff; color:#0f172a;
-  border-radius:8px; padding:.35rem .55rem; display:inline-flex; align-items:center; gap:.35rem;
-}
-.btn-min:hover{ background:#f8fafc }
-.btn-min i{ margin:0 }
-
-/* Icon-only actions (Open / Download) */
-.icon-only{
-  width:36px; height:36px; display:inline-grid; place-items:center;
-  border:1px solid #e5e7eb; background:#fff; color:#0f172a; border-radius:8px;
-  text-decoration:none;
-}
-.icon-only:hover{ background:#f3f4f6 }
-.icon-group{ display:flex; gap:8px; }
-
-/* Optional: length text on the far right */
-.item--light .len{ color:#6b7280; font-variant-numeric:tabular-nums; font-size:.85rem; margin-left:8px }
-</style>
-
-{% if recs %}
-<section class="rail">
-  <h2>More messages</h2>
-  <div class="tracks">
-    {% for s in recs %}
-    <article class="track q-item item--light">
-  <img class="c"
-       src="{% if s.cover %}{{ s.cover.url }}{% else %}{% static 'assets/gatherings-flyer.png' %}{% endif %}"
-       alt="">
-
-  <div class="flex-grow-1">
-    <a class="t" href="{{ s.get_absolute_url }}">{{ s.title }}</a>
-    <div class="m">
-      {% if s.speaker %}{{ s.speaker }} • {% endif %}
-      <time datetime="{{ s.date|date:'Y-m-d' }}">{{ s.date|date:"M j, Y" }}</time>
-      {% if s.duration_s %} • {{ s.duration_hm }}{% endif %}
-    </div>
-
-    <div class="d-flex align-items-center gap-2 flex-wrap">
-      <!-- keep your play controls -->
-      <button class="btn-min q-pp"
-              data-src="{{ s.audio.url }}"
-              data-title="{{ s.title|escapejs }}"
-              data-speaker="{{ s.speaker|default_if_none:''|escapejs }}"
-              data-cover="{% if s.cover %}{{ s.cover.url }}{% else %}{% static 'assets/gatherings-flyer.png' %}{% endif %}">
-        <i class="bi bi-play-fill"></i> Quick play
-      </button>
-
-      <button class="btn-min q-into"
-              data-src="{{ s.audio.url }}"
-              data-title="{{ s.title|escapejs }}"
-              data-speaker="{{ s.speaker|default_if_none:''|escapejs }}"
-              data-cover="{% if s.cover %}{{ s.cover.url }}{% else %}{% static 'assets/gatherings-flyer.png' %}{% endif %}">
-        <i class="bi bi-disc"></i> Play in player
-      </button>
-
-      <!-- icon-only actions on the right -->
-      <span class="ms-auto icon-group">
-        <a class="icon-only" href="{{ s.get_absolute_url }}" title="Open details" aria-label="Open details">
-          <i class="bi bi-box-arrow-up-right"></i>
-        </a>
-        <a class="icon-only" href="{{ s.audio.url }}" download title="Download audio" aria-label="Download audio">
-          <i class="bi bi-download"></i>
-        </a>
-      </span>
     </div>
   </div>
 
-  {% if s.duration_s %}
-  <div class="len">{{ s.duration_hm }}</div>
+  {% if object.description %}
+    <div class="row">
+      <div class="col-12 col-lg-10">
+        <p class="lead">{{ object.description | safe }}</p>
+      </div>
+    </div>
   {% endif %}
 
-  <audio class="q-audio" preload="none"></audio>
-</article>
-
-    {% endfor %}
+  <div class="mt-3">
+    <a href="{% url 'stream:past_list' %}" class="btn btn-link btn-sm"><i class="bi bi-arrow-left"></i> Back to Past Streams</a>
   </div>
-</section>
-{% endif %}
 
-
-  <!-- Micro sticky -->
-  <div class="micro" id="micro">
-    <img id="mCover" src="{% if sermon.cover %}{{ sermon.cover.url }}{% else %}{{ fallback_cover }}{% endif %}" alt="">
-    <div class="flex-grow-1">
-      <div class="t" id="mTitle">{{ sermon.title }}</div>
-      <div class="k" id="mK">Paused</div>
+  {% if related %}
+    <hr class="my-4">
+    <h5 class="mb-3">You might also like</h5>
+    <div class="row g-3">
+      {% for s in related %}
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card h-100 bg-dark text-white border-0">
+          {% if s.cover %}
+            <img src="{{ s.cover.url }}" class="card-img-top" alt="{{ s.title }}" style="aspect-ratio:16/9;object-fit:cover;">
+          {% endif %}
+          <div class="card-body">
+            <div class="fw-semibold text-truncate mb-1">{{ s.title }}</div>
+            <div class="text-muted small mb-2">{{ s.speaker }} • {{ s.date|date:"M j, Y" }}</div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary btn-sm js-play-now" data-slug="{{ s.slug }}"><i class="bi bi-play-fill"></i> Play</button>
+              <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="{{ s.slug }}"><i class="bi bi-plus-lg"></i> Queue</button>
+              <a href="{{ s.get_absolute_url }}" class="btn btn-outline-light btn-sm">Open</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-    <button class="icon-btn" id="mToggle" aria-label="Play/pause"><i class="bi bi-play-fill"></i></button>
-  </div>
-</main>
+  {% endif %}
+</div>
 {% endblock %}
 
 {% block scripts %}
+{{ block.super }}
 <script>
-(function(){
-  const audio = document.getElementById('audio');
-  const cd = document.getElementById('cd');
-  const disc = document.getElementById('disc');
-  const artImg = document.getElementById('artImg');
-  const tap = document.getElementById('tap');
-  const pp = document.getElementById('pp');
-  const back = document.getElementById('back');
-  const fwd = document.getElementById('fwd');
-  const tCur = document.getElementById('tCur');
-  const tDur = document.getElementById('tDur');
-  const seek = document.getElementById('seek');
-  const rate = document.getElementById('rate');
-  const vol = document.getElementById('vol');
-  const shareBtn = document.getElementById('shareBtn');
-  const viz = document.getElementById('viz');
-
-  const hTitle = document.getElementById('hTitle');
-  const hSpeaker = document.getElementById('hSpeaker');
-  const hDate = document.getElementById('hDate');
-  const hDur = document.getElementById('hDur');
-  const hCover = document.getElementById('hCover');
-  const dl = document.getElementById('dl');
-
-  const micro = document.getElementById('micro');
-  const mToggle = document.getElementById('mToggle');
-  const mTitle = document.getElementById('mTitle');
-  const mCover = document.getElementById('mCover');
-  const mK = document.getElementById('mK');
-
-  // NEW: repeat toggle
-  const repeat = document.getElementById('repeat');
-
-  // Helpers
-  function fmt(sec){
-    if(!isFinite(sec)) return '0:00';
-    sec = Math.max(0, Math.floor(sec));
-    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-    return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
-  }
-  function setIcons(){
-    const icon = audio.paused ? 'bi-play-fill' : 'bi-pause-fill';
-    pp.innerHTML = `<i class="bi ${icon}"></i>`;
-    mToggle.innerHTML = `<i class="bi ${icon}"></i>`;
-    // show "• Repeat" when loop is on
-    mK.textContent = audio.paused ? 'Paused' : ('Playing' + (audio.loop ? ' • Repeat' : ''));
-    document.title = (audio.paused ? '' : '▶ ') + hTitle.textContent + ' | Past Stream';
-    cd.classList.toggle('playing', !audio.paused);
-    viz.classList.toggle('playing', !audio.paused);
-
-    // reflect repeat button state
-    if (repeat){
-      repeat.classList.toggle('active', !!audio.loop);
-      repeat.setAttribute('aria-pressed', audio.loop ? 'true' : 'false');
-      repeat.title = audio.loop ? 'Repeat one' : 'Repeat off';
-    }
-  }
-  function updateDiscProgress(){
-    const pct = (audio.currentTime && audio.duration) ? (audio.currentTime / audio.duration) : 0;
-    disc.style.setProperty('--progress', (pct * 360) + 'deg');
-  }
-
-  // Base events
-  audio.addEventListener('loadedmetadata', ()=>{
-    tDur.textContent = fmt(audio.duration);
-    seek.max = audio.duration || 0;
-    updateDiscProgress();
-  });
-  audio.addEventListener('timeupdate', ()=>{
-    tCur.textContent = fmt(audio.currentTime);
-    if (!seek.dragging) seek.value = audio.currentTime || 0;
-    updateDiscProgress();
-  });
-  audio.addEventListener('play', setIcons);
-  audio.addEventListener('pause', setIcons);
-
-  // Controls
-  function toggle(){ audio.paused ? audio.play() : audio.pause(); }
-  tap.addEventListener('click', toggle);
-  pp.addEventListener('click', toggle);
-  mToggle.addEventListener('click', toggle);
-  back.addEventListener('click', ()=> audio.currentTime = Math.max(0, audio.currentTime - 15));
-  fwd.addEventListener('click',  ()=> audio.currentTime = Math.min(audio.duration||Infinity, audio.currentTime + 30));
-  rate.addEventListener('change', ()=> audio.playbackRate = parseFloat(rate.value));
-  vol.addEventListener('input', ()=> audio.volume = parseFloat(vol.value));
-
-  // NEW: Repeat click handler
-  if (repeat){
-    repeat.addEventListener('click', () => {
-      audio.loop = !audio.loop;
-      repeat.classList.toggle('active', audio.loop);
-      repeat.setAttribute('aria-pressed', audio.loop ? 'true' : 'false');
-      repeat.title = audio.loop ? 'Repeat one' : 'Repeat off';
-      mK.textContent = audio.paused ? 'Paused' : ('Playing' + (audio.loop ? ' • Repeat' : ''));
+  // Copy link UX
+  const copyBtn = document.getElementById('copyLinkBtn');
+  if(copyBtn){
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(copyBtn.dataset.url);
+        copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied';
+        setTimeout(()=> copyBtn.innerHTML = '<i class="bi bi-link-45deg"></i> Copy link', 1200);
+      }catch(e){ alert('Could not copy link'); }
     });
   }
 
-  // Seek
-  seek.addEventListener('input', ()=>{ seek.dragging = true; });
-  seek.addEventListener('change', ()=>{ audio.currentTime = parseFloat(seek.value||0); seek.dragging = false; });
-
-  // Disc scrub
-  let draggingDisc=false;
-  function center(el){ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
-  function angle(e,ctr){ const p=(e.touches?e.touches[0]:e), x=p.clientX-ctr.x, y=p.clientY-ctr.y; let a=Math.atan2(y,x); return a<0?a+2*Math.PI:a; }
-  function onDiscDown(e){ draggingDisc=true; document.addEventListener('mousemove',onDiscMove); document.addEventListener('mouseup',onDiscUp); document.addEventListener('touchmove',onDiscMove,{passive:false}); document.addEventListener('touchend',onDiscUp); onDiscMove(e); }
-  function onDiscMove(e){ if(!draggingDisc||!isFinite(audio.duration)) return; e.preventDefault&&e.preventDefault(); const ctr=center(disc); const pct=angle(e,ctr)/(2*Math.PI); const target=pct*(audio.duration||0); seek.value=target; tCur.textContent=fmt(target); disc.style.setProperty('--progress',(pct*360)+'deg'); }
-  function onDiscUp(){ if(!draggingDisc) return; draggingDisc=false; audio.currentTime=parseFloat(seek.value||0); document.removeEventListener('mousemove',onDiscMove); document.removeEventListener('mouseup',onDiscUp); document.removeEventListener('touchmove',onDiscMove); document.removeEventListener('touchend',onDiscUp); }
-  disc.addEventListener('mousedown', onDiscDown);
-  disc.addEventListener('touchstart', onDiscDown, {passive:false});
-
-  // Keyboard
-  window.addEventListener('keydown', (e)=>{
-    if (e.target && ['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
-    if (e.code==='Space'){ e.preventDefault(); toggle(); }
-    if (e.code==='ArrowLeft'){ audio.currentTime = Math.max(0, audio.currentTime - 5); }
-    if (e.code==='ArrowRight'){ audio.currentTime = Math.min(audio.duration||Infinity, audio.currentTime + 5); }
-  });
-
-  // Sticky micro
-  let microShown=false;
-  window.addEventListener('scroll', ()=>{
-    const y=window.scrollY||document.documentElement.scrollTop;
-    if(y>260 && !microShown){ micro.classList.add('show'); microShown=true; }
-    else if(y<=260 && microShown){ micro.classList.remove('show'); microShown=false; }
-  }, {passive:true});
-
-  // Share
-  if (shareBtn){
-    shareBtn.addEventListener('click', async ()=>{
-      const url=location.href; const text=hTitle.textContent + (hSpeaker?.textContent ? (' — ' + hSpeaker.textContent) : '');
-      if (navigator.share){ try{ await navigator.share({title: document.title, text, url}); }catch(e){} }
-      else { try{ await navigator.clipboard.writeText(url); shareBtn.innerHTML='<i class="bi bi-clipboard-check"></i>'; setTimeout(()=> shareBtn.innerHTML='<i class="bi bi-share"></i>',1500); } catch(e){ window.prompt('Copy this link:', url); } }
-    });
-  }
-
-  // Media Session
-  function setMediaSession(title, speaker, cover){
-    if(!('mediaSession' in navigator)) return;
-    try{
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title, artist:speaker||'', album:'Layers of Truth',
-        artwork: [{src:cover, sizes:'512x512', type:'image/png'}]
-      });
-      navigator.mediaSession.setActionHandler('play', ()=>audio.play());
-      navigator.mediaSession.setActionHandler('pause',()=>audio.pause());
-      navigator.mediaSession.setActionHandler('seekbackward',(d)=> audio.currentTime=Math.max(0,audio.currentTime-(d.seekOffset||10)));
-      navigator.mediaSession.setActionHandler('seekforward', (d)=> audio.currentTime=Math.min(audio.duration||Infinity,audio.currentTime+(d.seekOffset||30)));
-      navigator.mediaSession.setActionHandler('seekto', (d)=> { if(d.fastSeek&&'fastSeek' in audio) audio.fastSeek(d.seekTime); else audio.currentTime=d.seekTime; });
-    }catch(e){}
-  }
-
-  // Load a track into main player (from suggestion)
-  function loadIntoMain({src,title,speaker,cover}){
-    if(!src) return;
-    audio.src = src;
-    audio.play().catch(()=>{});
-    hTitle.textContent = title || 'Untitled';
-    if(speaker){ hSpeaker.textContent = speaker; hSpeaker.parentElement?.removeAttribute('hidden'); } else { hSpeaker.textContent=''; hSpeaker.parentElement?.setAttribute('hidden',''); }
-    hCover.src = cover; artImg.src = cover; mCover.src = cover; mTitle.textContent = title || 'Untitled';
-    dl.href = src;
-    setMediaSession(title, speaker, cover);
-    setIcons();
-  }
-
-  // Suggestions: quick players & “play in player”
-  const items = document.querySelectorAll('.q-item');
-  let activeQuick = null;
-
-  items.forEach(card=>{
-    const qAudio = card.querySelector('.q-audio');
-    const qPP = card.querySelector('.q-pp');
-    const qInto = card.querySelector('.q-into');
-    const qTime = card.querySelector('.q-time');
-
-    function setQIcon(){
-      qPP.innerHTML = `<i class="bi ${qAudio.paused ? 'bi-play-fill' : 'bi-pause-fill'}"></i> ${qAudio.paused?'Quick play':'Pause'}`;
-    }
-    function stopOthers(){
-      document.querySelectorAll('.q-audio').forEach(a=>{ if(a!==qAudio) { a.pause(); a.currentTime = a.currentTime; }});
-    }
-
-    qAudio.addEventListener('loadedmetadata', ()=> qTime.textContent = fmt(qAudio.duration));
-    qAudio.addEventListener('play', ()=>{ setQIcon(); activeQuick = qAudio; });
-    qAudio.addEventListener('pause', setQIcon);
-
-    qPP.addEventListener('click', ()=>{
-      if(!qAudio.src){ qAudio.src = qPP.dataset.src; }
-      if(!qAudio.src) return;
-      stopOthers();
-      qAudio.paused ? qAudio.play() : qAudio.pause();
-    });
-
-    qInto.addEventListener('click', ()=>{
-      loadIntoMain({
-        src: qInto.dataset.src,
-        title: qInto.dataset.title,
-        speaker: qInto.dataset.speaker,
-        cover: qInto.dataset.cover
-      });
+  // Optional: make cover click "Play now"
+  document.querySelectorAll('.hero-img').forEach(img=>{
+    img.addEventListener('click', ()=>{
+      const play = document.querySelector('.js-play-now[data-slug="{{ object.slug }}"]');
+      play?.dispatchEvent(new Event('click', {bubbles:true}));
     });
   });
+</script>
 
-  // Init media session on first track
-  setMediaSession(hTitle.textContent, hSpeaker?.textContent || '', artImg.src);
-  setIcons();
-})();
+{# SEO: structured data #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MusicRecording",
+  "name": "{{ object.title|escapejs }}",
+  "byArtist": "{{ object.speaker|escapejs }}",
+  "datePublished": "{{ object.date|date:'Y-m-d' }}",
+  "duration": "PT{{ object.duration_s|default:0 }}S",
+  {% if object.cover %}"image": "{{ object.cover.url }}",{% endif %}
+  "url": "{{ request.build_absolute_uri }}",
+  "inLanguage": "en"
+}
 </script>
 {% endblock %}
