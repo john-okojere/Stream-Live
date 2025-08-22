@@ -147,6 +147,78 @@
     #livePlayerHost {
       min-height: 180px;
     }
+    /* Offcanvas mobile hub polish */
+.oc-card{
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+}
+#ocQuickList .list-group-item{
+  background: transparent;
+  color: #e6edf3;
+  border-color: rgba(255,255,255,.08);
+}
+#ocQuickList .list-group-item .thumb{
+  width:44px; height:44px; object-fit:cover; border-radius:10px;
+  border:1px solid rgba(255,255,255,.12); background:#0b1222;
+}
+.oc-tag{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.18);
+  color:#dfe3ff; border-radius:999px; padding:.25rem .6rem;
+  font-size:.83rem;
+}
+.store-badge{
+  width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+  color:#fff; font-size:1.1rem;
+}
+
+/* Simple skeleton shimmer */
+.oc-skel{
+  height:44px; border-radius:10px;
+  background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.18), rgba(255,255,255,.06));
+  background-size:280% 100%; animation: ocSh 1.2s infinite linear;
+}
+@keyframes ocSh { 0%{background-position:200% 0} 100%{background-position:-80% 0} }
+/* Force white text inside the phone offcanvas */
+#lotOffcanvas, #lotOffcanvas * { color: #fff !important; }
+#lotOffcanvas .text-muted { color: rgba(255,255,255,.78) !important; }
+#lotOffcanvas .nav-link { color: #fff !important; }
+#lotOffcanvas .btn-outline-light { color:#fff !important; border-color: rgba(255,255,255,.45) !important; }
+#lotOffcanvas .btn-outline-light:hover { background: rgba(255,255,255,.10) !important; }
+
+#lotOffcanvas .lot-search{
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.28);
+  color:#fff;
+}
+#lotOffcanvas .lot-search::placeholder{ color: rgba(255,255,255,.75); }
+
+#ocQuickList .list-group-item{
+  background:transparent; border-color: rgba(255,255,255,.12);
+}
+#ocQuickList .thumb{
+  width:44px; height:44px; object-fit:cover; border-radius:10px;
+  border:1px solid rgba(255,255,255,.18); background:#0b1222;
+}
+.oc-card{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+}
+.oc-tag{
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.22);
+  color:#fff; border-radius:999px; padding:.25rem .6rem; font-size:.83rem;
+}
+
+/* simple skeleton shimmer */
+.oc-skel{ height:44px; border-radius:10px;
+  background:linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.18), rgba(255,255,255,.08));
+  background-size:280% 100%; animation:ocSh 1.2s linear infinite;
+}
+@keyframes ocSh{ 0%{background-position:200% 0} 100%{background-position:-80% 0} }
+
   </style>
 
   {% block head %}{% endblock %}
@@ -204,36 +276,85 @@
     </div>
   </nav>
 
-  <!-- Phone Sidebar -->
-  <div class="offcanvas offcanvas-start lot-offcanvas" tabindex="-1" id="lotOffcanvas" aria-labelledby="lotOffcanvasLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title d-flex align-items-center gap-2" id="lotOffcanvasLabel">
-        <img class="lot-brand-logo" src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth">
-        <span class="vr mx-2 opacity-50 d-none d-sm-inline"></span>
-        <button class="lot-brand navbar-brand btn-sm badge-live" type="button" data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" aria-controls="liveDrawer" title="Listen Live" style="border:none;">
-          <i class="bi bi-broadcast-pin"></i>
-          <span class="d-none d-sm-inline">Live</span>
-          <span class="pulse-dot" aria-hidden="true"></span>
-        </button>
-      </h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body d-flex flex-column">
-      <ul class="navbar-nav flex-grow-1">
-        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name|inlist:'past_list' %}active{% endif %}" href="{% url 'stream:past_list' %}"><i class="bi bi-journal-music"></i> Past Streams</a></li>
-        {% if request.user.is_staff %}
-        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'upload_sermon' %}active{% endif %}" href="{% url 'stream:upload_sermon' %}"><i class="bi bi-upload"></i> Upload</a></li>
-        {% endif %}
+<!-- Phone Sidebar -->
+<div class="offcanvas offcanvas-start lot-offcanvas" tabindex="-1" id="lotOffcanvas" aria-labelledby="lotOffcanvasLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title d-flex align-items-center gap-2" id="lotOffcanvasLabel">
+      <img class="lot-brand-logo" src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth">
+      <span class="vr mx-2 opacity-50 d-none d-sm-inline"></span>
+      <!-- Live button (opens live drawer; no navigation) -->
+      <button class="lot-brand navbar-brand btn-sm badge-live" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" aria-controls="liveDrawer"
+              title="Listen Live" style="border:none;">
+        <i class="bi bi-broadcast-pin"></i>
+        <span class="d-none d-sm-inline">Live</span>
+        <span class="pulse-dot" aria-hidden="true"></span>
+      </button>
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column">
+    <!-- Mobile search (SPA if available, else falls back to /past/?q=...) -->
+    <h5><i class="bi bi-journal-music"></i>Streams</h5>
+    <form id="ocSearch" class="d-flex gap-2 mb-3" role="search" aria-label="Search sermons">
+      <input class="form-control lot-search" name="q" placeholder="Search title, speaker, tag…">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+      <button class="btn btn-outline-light" type="button" id="ocClear" title="Clear"><i class="bi bi-x-lg"></i></button>
+    </form>
+
+    <!-- Quick Picks (random 3) -->
+    <div class="oc-card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="m-0 d-flex align-items-center gap-2"><i class="bi bi-stars"></i> Quick Picks</h6>
+        <button class="btn btn-outline-light btn-sm" id="ocShuffle" title="Shuffle"><i class="bi bi-shuffle"></i></button>
+      </div>
+      <ul id="ocQuickList" class="list-group list-group-flush small">
+        <!-- filled by JS -->
       </ul>
-      <div class="d-flex gap-3 mt-3">
-        <a class="text-decoration-none" style="color:inherit" href="https://layersoftruth.org/" target="_blank" rel="noopener"><i class="bi bi-globe"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://x.com/Layers_of_Truth" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://www.youtube.com/@layersoftruth_ng" target="_blank" rel="noopener"><i class="bi bi-youtube"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://www.instagram.com/layersoftruth_ng/" target="_blank" rel="noopener"><i class="bi bi-instagram"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://www.facebook.com/layersoftruthng/" target="_blank" rel="noopener"><i class="bi bi-facebook"></i></a>
+    </div>
+
+    <!-- Top Tags -->
+    <div class="oc-card p-3 mb-3">
+      <h6 class="mb-2"><i class="bi bi-tags"></i> Popular Tags</h6>
+      <div id="ocTags" class="d-flex flex-wrap gap-2">
+        <!-- filled by JS -->
       </div>
     </div>
+
+    <!-- Navigation -->
+      {% if request.user.is_staff %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'upload_sermon' %}active{% endif %}" href="{% url 'stream:upload_sermon' %}">
+          <i class="bi bi-upload"></i> Upload
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+
+    <!-- Store card -->
+    <div class="oc-card p-3 mb-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="store-badge"><i class="bi bi-bag-heart"></i></div>
+        <div class="flex-grow-1">
+          <div class="fw-bold">Layers of Truth Store</div>
+          <div class="text-muted small">Faith-forward merch & resources. Ship to your door.</div>
+        </div>
+        <a class="btn btn-outline-light btn-sm" href="https://store.layersoftruth.org" target="_blank" rel="noopener">
+          <i class="bi bi-box-arrow-up-right"></i> Open
+        </a>
+      </div>
+    </div>
+
+    <!-- Socials -->
+    <div class="d-flex gap-3 mt-auto pt-2">
+      <a class="text-decoration-none" style="color:inherit" href="https://layersoftruth.org/" target="_blank" rel="noopener"><i class="bi bi-globe"></i></a>
+      <a class="text-decoration-none" style="color:inherit" href="https://x.com/Layers_of_Truth" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
+      <a class="text-decoration-none" style="color:inherit" href="https://www.youtube.com/@layersoftruth_ng" target="_blank" rel="noopener"><i class="bi bi-youtube"></i></a>
+      <a class="text-decoration-none" style="color:inherit" href="https://www.instagram.com/layersoftruth_ng/" target="_blank" rel="noopener"><i class="bi bi-instagram"></i></a>
+      <a class="text-decoration-none" style="color:inherit" href="https://www.facebook.com/layersoftruthng/" target="_blank" rel="noopener"><i class="bi bi-facebook"></i></a>
+    </div>
   </div>
+</div>
 
   {% if messages %}
   <div class="lot-messages">
@@ -530,6 +651,207 @@
       try { audio.pause(); } catch {}
     });
   })();
+</script>
+<script>
+(function(){
+  const oc = document.getElementById('lotOffcanvas');
+  if(!oc) return;
+
+  // Endpoints
+  const SIDEBAR_API = "{% url 'stream:sidebar_summary_json' %}";
+  // Try to read the list API from your page root; otherwise default to a known path
+  const pageRoot = document.getElementById('pageRoot');
+  const LIST_API = (pageRoot && pageRoot.dataset.api) ? pageRoot.dataset.api : "/api/sermons/";
+
+  // Main grid/pager targets
+  const grid  = document.getElementById('sermonGrid');
+  const pager = document.getElementById('paginationBar');
+
+  // Offcanvas controls
+  const quickList = document.getElementById('ocQuickList');
+  const tagsWrap  = document.getElementById('ocTags');
+  const form      = document.getElementById('ocSearch');
+  const btnClear  = document.getElementById('ocClear');
+  const btnShuffle= document.getElementById('ocShuffle');
+
+  // Utils
+  const esc = s => (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  function hideOffcanvas(){
+    const inst = bootstrap.Offcanvas.getInstance(oc) || new bootstrap.Offcanvas(oc);
+    inst.hide();
+  }
+
+  // ---------- SPA List Rendering (no reload) ----------
+  function tagHTML(list){
+    return (list||[]).map(t=>`<span class="tag-pill">#${esc(t)}</span>`).join('');
+  }
+
+  function cardHTML(it){
+    return `
+    <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xxl-3">
+      <div class="lot-card h-100 position-relative" data-slug="${esc(it.slug)}">
+        <div class="lot-thumb">
+          ${it.cover ? `<img src="${esc(it.cover)}" alt="${esc(it.title)}" loading="lazy" decoding="async">` : ``}
+          <div class="lot-actions">
+            <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play now" aria-label="Play now"><i class="bi bi-play-fill"></i></button>
+            <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Add to queue" aria-label="Add to queue"><i class="bi bi-plus-lg"></i></button>
+          </div>
+          <div class="lot-overlay">
+            <span class="lot-chip"><i class="bi bi-clock-history"></i> ${esc(it.duration_hm || "—")}</span>
+            <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" aria-label="Details">
+              <i class="bi bi-box-arrow-up-right"></i> <span class="d-none d-sm-inline">Details</span>
+            </button>
+          </div>
+        </div>
+        <div class="p-3">
+          <div class="fw-bold text-truncate" title="${esc(it.title)}">${esc(it.title)}</div>
+          <div class="text-light small mb-2">${esc(it.speaker||"")} • ${esc(it.date_display||"")}</div>
+          ${it.tags && it.tags.length ? `<div class="mb-2">${tagHTML(it.tags)}</div>` : ``}
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" aria-label="Play"><i class="bi bi-play-fill"></i> <span class="actions-label">Play</span></button>
+            <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" aria-label="Queue"><i class="bi bi-plus-lg"></i> <span class="actions-label">Queue</span></button>
+            <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" aria-label="Details"><i class="bi bi-box-arrow-up-right"></i> <span class="actions-label">Details</span></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function pagerHTML(page, pages, hasPrev, hasNext){
+    return `
+      <ul class="pagination">
+        ${hasPrev ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page-1}">Prev</a></li>` : ``}
+        <li class="page-item disabled"><span class="page-link">Page ${page} of ${pages}</span></li>
+        ${hasNext ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page+1}">Next</a></li>` : ``}
+      </ul>`;
+  }
+
+  async function spaLoad(params = {}, doPush = true){
+    // Build URL to list API
+    const url = new URL(LIST_API, location.origin);
+    Object.entries(params).forEach(([k,v])=>{
+      if(v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
+    });
+
+    const res = await fetch(url, { credentials:'same-origin' });
+    if(!res.ok) return;
+    const data = await res.json();
+
+    // Render to grid + pager
+    if(grid){
+      grid.innerHTML = data.items.map(cardHTML).join("") ||
+        `<div class="col"><div class="alert alert-secondary">No sermons yet.</div></div>`;
+    }
+    if(pager){
+      pager.innerHTML = pagerHTML(data.page, data.pages, data.has_prev, data.has_next);
+    }
+
+    // Update the address bar without reload
+    if(doPush){
+      const qs = url.searchParams.toString();
+      history.pushState({ q:url.searchParams.get('q') || '', page:data.page }, "", qs ? `?${qs}` : location.pathname);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  // ---------- Offcanvas data (quick picks + tags) ----------
+  function rowHTML(it){
+    return `
+    <li class="list-group-item px-0 py-2">
+      <div class="d-flex align-items-center gap-2">
+        <img class="thumb" src="${esc(it.cover||'')}" alt="">
+        <div class="flex-grow-1">
+          <div class="small fw-semibold text-truncate">${esc(it.title)}</div>
+          <div class="text-muted small">${esc(it.speaker||'')} ${it.duration_hm ? '• '+esc(it.duration_hm) : ''}</div>
+        </div>
+        <div class="d-flex gap-1">
+          <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play"><i class="bi bi-play-fill"></i></button>
+          <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Queue"><i class="bi bi-plus-lg"></i></button>
+          <button class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" title="Details"><i class="bi bi-box-arrow-up-right"></i></button>
+        </div>
+      </div>
+    </li>`;
+  }
+  function tagBtn(name){ return `<button type="button" class="btn oc-tag js-quick" data-q="${esc(name)}">#${esc(name)}</button>`; }
+
+  async function loadSidebar(){
+    try{
+      quickList.innerHTML = `<li class="list-group-item px-0"><div class="oc-skel"></div></li>
+                             <li class="list-group-item px-0"><div class="oc-skel"></div></li>
+                             <li class="list-group-item px-0"><div class="oc-skel"></div></li>`;
+      tagsWrap.innerHTML = `<div class="oc-skel" style="height:28px;width:60%"></div>`;
+
+      const res = await fetch(SIDEBAR_API, { credentials:'same-origin' });
+      const data = await res.json();
+
+      quickList.innerHTML = (data.random_items||[]).map(rowHTML).join('') ||
+        `<li class="list-group-item px-0 text-muted small">No picks yet.</li>`;
+      tagsWrap.innerHTML = (data.top_tags||[]).slice(0,12).map(t=>tagBtn(t.name)).join('') ||
+        `<span class="text-muted small">No tags yet.</span>`;
+    }catch(e){
+      console.error(e);
+      quickList.innerHTML = `<li class="list-group-item px-0 text-muted small">Could not load picks.</li>`;
+      tagsWrap.innerHTML = `<span class="text-muted small">Could not load tags.</span>`;
+    }
+  }
+
+  // ---------- Event wiring (no reloads) ----------
+  // Open: refresh quick picks/tags
+  oc.addEventListener('shown.bs.offcanvas', loadSidebar);
+  // Shuffle quick picks
+  btnShuffle?.addEventListener('click', loadSidebar);
+
+  // Submit search (SPA only)
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const q = form.q.value.trim();
+    await spaLoad({ q, page:1 });
+    hideOffcanvas();
+  });
+
+  // Clear search (SPA only)
+  btnClear?.addEventListener('click', async ()=>{
+    form.q.value = '';
+    await spaLoad({ q:'', page:1 });
+    hideOffcanvas();
+  });
+
+  // Quick tag → SPA search
+  document.addEventListener('click', async (e)=>{
+    const tag = e.target.closest('.js-quick');
+    if(tag){
+      e.preventDefault();
+      await spaLoad({ q: tag.dataset.q || '', page:1 });
+      hideOffcanvas();
+    }
+  });
+
+  // Intercept "Past Streams" link in the offcanvas → SPA list, no nav
+  oc.addEventListener('click', async (e)=>{
+    const a = e.target.closest('a.nav-link[href]');
+    if(!a) return;
+    if (a.href.includes('/past')) {
+      e.preventDefault();
+      // keep current query if present; otherwise load page 1
+      const currentQ = (new URL(location.href)).searchParams.get('q') || '';
+      await spaLoad({ q: currentQ, page:1 });
+      hideOffcanvas();
+    }
+  });
+
+  // Intercept pagination links and handle SPA (works with our pagerHTML)
+  document.addEventListener('click', async (e)=>{
+    const link = e.target.closest('a.page-link.js-page');
+    if(!link) return;
+    e.preventDefault();
+    const page = parseInt(link.dataset.page || "1", 10);
+    const q = (new URL(location.href)).searchParams.get('q') || '';
+    await spaLoad({ q, page });
+  });
+
+  // Expose spaLoad if you want to trigger it elsewhere
+  window.spaLoad = spaLoad;
+})();
 </script>
 
 </body>
