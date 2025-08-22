@@ -1,7 +1,71 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Streams — Layers of Truth{% endblock %}
+{% block meta %}
+<!-- === Layers of Truth — Global SEO (no variables) =================== -->
+<title>Layers of Truth — Live & Past Sermons</title>
+<meta name="description" content="Stream live messages and explore past sermons from Layers of Truth. Play, queue, and share inspiring teachings anytime." />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://stream.layersoftruth.org/" />
 
+<!-- Performance hints -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+<!-- Open Graph -->
+<meta property="og:site_name" content="Layers of Truth" />
+<meta property="og:title" content="Layers of Truth — Live & Past Sermons" />
+<meta property="og:description" content="Stream live messages and explore past sermons from Layers of Truth. Play, queue, and share inspiring teachings anytime." />
+<meta property="og:url" content="https://stream.layersoftruth.org/" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="{% static 'assets/worship.png' %}" />
+<meta property="og:image:alt" content="Layers of Truth" />
+<meta property="og:locale" content="en_NG" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Layers of Truth — Live & Past Sermons" />
+<meta name="twitter:description" content="Stream live messages and explore past sermons from Layers of Truth. Play, queue, and share inspiring teachings anytime." />
+<meta name="twitter:image" content="{% static 'assets/worship.png' %}" />
+
+<!-- Theme -->
+<meta name="theme-color" content="#0b1222" />
+<meta name="color-scheme" content="dark light" />
+
+<!-- JSON-LD: Organization + WebSite + Site Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "Layers of Truth",
+      "url": "https://stream.layersoftruth.org/",
+      "logo": "https://stream.layersoftruth.org/static/assets/LOT-LOGO-PNG-WHITE.png",
+      "sameAs": [
+        "https://layersoftruth.org/",
+        "https://x.com/Layers_of_Truth",
+        "https://www.youtube.com/@layersoftruth_ng",
+        "https://www.instagram.com/layersoftruth_ng/",
+        "https://www.facebook.com/layersoftruthng/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "name": "Layers of Truth",
+      "url": "https://stream.layersoftruth.org/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://stream.layersoftruth.org/past/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
+<!-- =================================================================== -->
+
+{% endblock %}
 {% block head %}
 <style>
   .lot-card{
