@@ -391,7 +391,7 @@
                   </div>
                 {% endif %}
 
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-1">
                   <button class="btn btn-primary btn-sm js-play-now" data-slug="{{ s.slug }}"><i class="bi bi-play-fill"></i> Play</button>
                   <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="{{ s.slug }}"><i class="bi bi-plus-lg"></i> Queue</button>
                   <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="{{ s.slug }}">Details</button>
@@ -699,7 +699,7 @@ document.addEventListener('click', async (e)=>{
             <div class="fw-bold text-truncate" title="${esc(it.title)}">${esc(it.title)}</div>
             <div class="text-light small mb-2">${esc(it.speaker||"")} • ${esc(it.date_display||"")}</div>
             ${it.tags && it.tags.length ? `<div class="mb-2">${it.tags.map(t=>`<span class="tag-pill">#${esc(t)}</span>`).join("")}</div>` : ``}
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-1">
               <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}"><i class="bi bi-play-fill"></i> Play</button>
               <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}"><i class="bi bi-plus-lg"></i> Queue</button>
               <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}">Details</button>
