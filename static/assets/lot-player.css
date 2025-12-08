@@ -1,0 +1,131 @@
+/* ===== Layers of Truth — Glass Player ================================== */
+:root{
+  --lot-bg: rgba(16,22,39,.86);
+  --lot-bg-2: rgba(10,15,28,.92);
+  --lot-ring: rgba(255,255,255,.08);
+  --lot-ink: #e6edf3;
+  --lot-muted: #a8b3c7;
+  --lot-accent: #7b8cff;
+  --lot-accent-2:#d248ff;
+}
+
+/* Sticky bar */
+.lot-player{
+  position:fixed; left:0; right:0; bottom:0; z-index:1030;
+  color: var(--lot-ink);
+  background: linear-gradient(180deg, var(--lot-bg), var(--lot-bg-2));
+  border-top: 1px solid var(--lot-ring);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  overflow: clip;
+}
+
+/* Blurred cover glow — set via JS to --cover-img */
+.lot-player::before{
+  content:"";
+  position:absolute; inset:-40px;
+  background-image: var(--cover-img, none);
+  background-size: cover; background-position: center;
+  filter: blur(28px) saturate(1.15) brightness(.65);
+  opacity: .25; transform: scale(1.06);
+  transition: background-image .25s ease, opacity .25s ease;
+  pointer-events: none;
+}
+
+/* Buttons */
+.lot-player .btn{
+  border-radius: 10px;
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(4px);
+}
+.lot-player .btn-light{
+  background: rgba(255,255,255,.08);
+  color: var(--lot-ink);
+  border-color: rgba(255,255,255,.20);
+}
+.lot-player .btn-light:hover{ background: rgba(255,255,255,.14); }
+
+.lot-player .btn-primary{
+  background: linear-gradient(90deg, var(--lot-accent), var(--lot-accent-2));
+  border: 0; color:#fff;
+  box-shadow: 0 6px 16px rgba(123,140,255,.28);
+}
+.lot-player .btn-primary:hover{ filter: brightness(1.06); }
+
+.lot-player .btn-toggle{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.22);
+  color: var(--lot-ink);
+}
+.lot-player .btn-toggle.active,
+.lot-player .btn-toggle[aria-pressed="true"]{
+  background: linear-gradient(90deg, var(--lot-accent), var(--lot-accent-2));
+  color:#fff; border-color: transparent;
+}
+
+/* Title/artist & tiny EQ */
+.eq{ display:flex; gap:2px; width:18px; height:14px; align-items:flex-end; opacity:.55; }
+.eq span{ width:3px; background:var(--lot-accent); border-radius:1px; height:22%;
+  transform-origin:bottom; animation:eq 1s linear infinite; animation-play-state:paused; }
+.eq span:nth-child(1){ animation-duration:.9s }
+.eq span:nth-child(2){ animation-duration:1.1s }
+.eq span:nth-child(3){ animation-duration:.95s }
+.eq span:nth-child(4){ animation-duration:1.05s }
+.eq span:nth-child(5){ animation-duration:1.2s }
+@keyframes eq{ 0%{transform:scaleY(.3)} 50%{transform:scaleY(1)} 100%{transform:scaleY(.3)} }
+#lot-player.is-playing .eq span{ animation-play-state: running; opacity:.95; }
+
+/* Seek bar with played + buffered visualization (Chrome/FF) */
+#lot-seek{
+  --played: 0%;
+  --buffered: 0%;
+  width:100%;
+  background:
+    linear-gradient(var(--lot-accent), var(--lot-accent)) 0/var(--played) 100% no-repeat,
+    linear-gradient(rgba(255,255,255,.45), rgba(255,255,255,.45)) 0/var(--buffered) 100% no-repeat,
+    linear-gradient(rgba(255,255,255,.18), rgba(255,255,255,.18));
+  border-radius: 6px;
+  height: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* WebKit */
+#lot-seek::-webkit-slider-runnable-track{
+  height:6px; border-radius:6px; background:transparent;
+}
+#lot-seek::-webkit-slider-thumb{
+  -webkit-appearance: none; appearance: none;
+  margin-top: -6px; /* centers the thumb on 6px track */
+  height:18px; width:18px; border-radius:50%;
+  background: #fff; border: 3px solid var(--lot-accent);
+  box-shadow: 0 0 0 3px rgba(123,140,255,.20);
+}
+
+/* Firefox */
+#lot-seek::-moz-range-track{
+  height:6px; border-radius:6px; background: transparent;
+}
+#lot-seek::-moz-range-progress{
+  height:6px; border-radius:6px; background: var(--lot-accent);
+}
+#lot-seek::-moz-range-thumb{
+  height:18px; width:18px; border-radius:50%;
+  background:#fff; border:3px solid var(--lot-accent);
+  box-shadow: 0 0 0 3px rgba(123,140,255,.20);
+}
+
+/* Time text */
+.lot-player .small{ color: var(--lot-muted) !important; }
+
+/* Cover image shape & ring */
+#lot-cover{
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 8px 20px rgba(0,0,0,.35);
+}
+
+/* Compact tweaks for very small screens */
+@media (max-width: 420px){
+  #lot-speed{ display:none; }
+}

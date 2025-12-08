@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://stream.layersoftruth.org/sitemap.xml

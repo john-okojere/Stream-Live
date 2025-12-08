@@ -40,7 +40,7 @@ db.sqlite3
 # Media & Static (Optional if generated dynamically)
 media/
 staticfiles/
-static/
+# static/
 
 # Secrets & Configs
 .env
