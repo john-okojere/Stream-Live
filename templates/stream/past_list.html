@@ -1,368 +1,201 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Streams — Layers of Truth{% endblock %}
+
+{% block title %}Streams | Layers of Truth{% endblock %}
 {% block meta %}
-<!-- === Layers of Truth — Global SEO (no variables) =================== -->
-<title>Layers of Truth — Live & Past Sermons</title>
+<!-- SEO -->
 <meta name="description" content="Stream live messages and explore past sermons from Layers of Truth. Play, queue, and share inspiring teachings anytime." />
 <meta name="robots" content="index,follow" />
 <link rel="canonical" href="https://stream.layersoftruth.org/" />
-
-<!-- Performance hints -->
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
-<!-- Open Graph -->
 <meta property="og:site_name" content="Layers of Truth" />
-<meta property="og:title" content="Layers of Truth — Live & Past Sermons" />
+<meta property="og:title" content="Layers of Truth – Live & Past Sermons" />
 <meta property="og:description" content="Stream live messages and explore past sermons from Layers of Truth. Play, queue, and share inspiring teachings anytime." />
 <meta property="og:url" content="https://stream.layersoftruth.org/" />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="{% static 'assets/worship.png' %}" />
 <meta property="og:image:alt" content="Layers of Truth" />
 <meta property="og:locale" content="en_NG" />
-
-<!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Layers of Truth — Live & Past Sermons" />
+<meta name="twitter:title" content="Layers of Truth – Live & Past Sermons" />
 <meta name="twitter:description" content="Stream live messages and explore past sermons from Layers of Truth. Play, queue, and share inspiring teachings anytime." />
 <meta name="twitter:image" content="{% static 'assets/worship.png' %}" />
-
-<!-- Theme -->
-<meta name="theme-color" content="#0b1222" />
-<meta name="color-scheme" content="dark light" />
-
-<!-- JSON-LD: Organization + WebSite + Site Search -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "name": "Layers of Truth",
-      "url": "https://stream.layersoftruth.org/",
-      "logo": "https://stream.layersoftruth.org/static/assets/LOT-LOGO-PNG-WHITE.png",
-      "sameAs": [
-        "https://layersoftruth.org/",
-        "https://x.com/Layers_of_Truth",
-        "https://www.youtube.com/@layersoftruth_ng",
-        "https://www.instagram.com/layersoftruth_ng/",
-        "https://www.facebook.com/layersoftruthng/"
-      ]
-    },
-    {
-      "@type": "WebSite",
-      "name": "Layers of Truth",
-      "url": "https://stream.layersoftruth.org/",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://stream.layersoftruth.org/past/?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    }
-  ]
-}
-</script>
-<!-- =================================================================== -->
-
 {% endblock %}
+
 {% block head %}
 <style>
+  .library-hero{
+    background:
+      radial-gradient(120% 120% at -10% -20%, rgba(123,140,255,.2), transparent 50%),
+      radial-gradient(110% 110% at 120% -10%, rgba(210,72,255,.16), transparent 52%),
+      linear-gradient(135deg, rgba(15,22,40,.94), rgba(10,16,28,.9));
+  }
+  .library-hero::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(280px 280px at 80% 35%, rgba(255,255,255,.05), transparent 60%);
+    pointer-events:none;
+  }
+
+  .filters-card{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:16px;
+    background: rgba(255,255,255,.04);
+  }
+
+  .btn-brand{
+    border:0; border-radius:12px; color:#fff;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    font-weight:800; letter-spacing:.2px;
+    box-shadow:0 10px 26px rgba(123,140,255,.28);
+  }
+  .btn-soft{
+    border-radius:12px;
+    background: rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);
+    color:#e6edf3;
+  }
+
   .lot-card{
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 14px; overflow: hidden;
-    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:16px; overflow:hidden;
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    box-shadow: 0 16px 34px rgba(0,0,0,.32);
   }
-  .lot-card:hover{
-    transform: translateY(-4px);
-    border-color: rgba(123,140,255,.35);
-    box-shadow: 0 10px 28px rgba(0,0,0,.35), 0 0 0 1px rgba(123,140,255,.18) inset;
-  }
-  .lot-thumb{ position: relative; aspect-ratio: 16/9; background: linear-gradient(135deg,#1d2744,#0d152b); }
+  .lot-card:hover{ transform: translateY(-4px); border-color: rgba(123,140,255,.36); box-shadow: 0 20px 40px rgba(0,0,0,.38); }
+  .lot-thumb{ position:relative; aspect-ratio:16/9; background: linear-gradient(135deg,#121b32,#0c1222); }
   .lot-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .lot-actions{ position:absolute; top:.5rem; right:.5rem; display:flex; gap:.4rem; }
+  .lot-thumb::after{
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.55));
+    pointer-events:none;
+  }
+  .lot-actions{ position:absolute; top:.6rem; right:.6rem; display:flex; gap:.4rem; z-index:2; }
   .lot-overlay{
-    position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:space-between;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.55));
-    padding:.6rem;
+    position:absolute; inset:0; z-index:2;
+    display:flex; align-items:flex-end; justify-content:space-between;
+    padding:.7rem;
   }
   .lot-chip{
-    display:inline-flex; align-items:center; gap:.4rem; padding:.2rem .5rem;
-    background: rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.12); color:#e6edf3;
-    border-radius:999px; font-size:.75rem; backdrop-filter:blur(4px);
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.3rem .65rem; border-radius:999px;
+    background: rgba(0,0,0,.55); color:#e6edf3;
+    border:1px solid rgba(255,255,255,.18);
+    font-weight:700; font-size:.9rem;
   }
-  .tag-pill{ display:inline-block; padding:.15rem .5rem; margin:.15rem .25rem 0 0;
-    border-radius:999px; font-size:.72rem; color:#a8b3c7; border:1px dashed rgba(255,255,255,.18); }
-  .lot-search{ background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); color:#e6edf3; }
-  .lot-search::placeholder{ color:#a8b3c7; }
-  .queued-burst{ position:absolute; inset:auto 10px 10px auto; background:rgba(123,140,255,.18);
-    border:1px solid rgba(123,140,255,.45); color:#dfe3ff; padding:.25rem .5rem; border-radius:8px; font-size:.8rem;
-    animation:fadeOut 1.1s ease forwards; }
+  .tag-pill{
+    display:inline-flex; align-items:center; gap:.3rem;
+    padding:.25rem .6rem; border-radius:999px;
+    background: rgba(255,255,255,.06);
+    border: 1px dashed rgba(255,255,255,.18);
+    color:#dfe3ff; font-size:.82rem;
+  }
+  .meta-line{ color: var(--muted); font-size:.93rem; }
+
+  .quick-list{ list-style:none; padding:0; margin:0; display:grid; gap:.75rem; }
+  .quick-item{ display:flex; align-items:center; gap:.65rem; }
+  .quick-item img{ width:50px; height:50px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:#0b1222; }
+
+  .active-filters{ display:flex; flex-wrap:wrap; gap:.5rem; }
+
+  /* Detail modal polish */
+  #sermonModal .modal-content{
+    background: rgba(20,28,46,.84);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    backdrop-filter: blur(12px) saturate(160%);
+  }
+  #sermonModal #md-cover{ width:160px; height:160px; object-fit:cover; border-radius:16px; border:1px solid rgba(255,255,255,.12); background:#0d1222; }
+  #sermonModal .badge{ background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); }
+
+  .queued-burst{
+    position:absolute; inset:auto 12px 12px auto;
+    background: rgba(123,140,255,.2);
+    color:#dfe3ff; border:1px solid rgba(123,140,255,.45);
+    padding:.3rem .6rem; border-radius:10px; font-weight:700; font-size:.85rem;
+    animation:fadeOut 1.1s ease forwards;
+  }
   @keyframes fadeOut{ 0%{opacity:0; transform:translateY(6px)} 25%{opacity:1; transform:none} 100%{opacity:0; transform:translateY(-6px)} }
-  .sidebar-card{ background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; }
-  @media (min-width: 992px){ .sidebar-sticky{ position: sticky; top: calc(var(--nav-h) + 12px); } }
-    /* ==== DETAILS MODAL: modern glass UI =================================== */
-#sermonModal .modal-dialog{ max-width: 920px; }
-#sermonModal .modal-content{
-  --glass: rgba(20,28,46,.72);
-  --ring: rgba(255,255,255,.10);
-  --ring-2: rgba(255,255,255,.06);
-  --ink: #e6edf3;
-  --muted: #a8b3c7;
-  --accent: #7b8cff;
-  --accent-2: #d248ff;
-  position: relative;
-  overflow: hidden;
-  color: var(--ink);
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-  border: 1px solid var(--ring);
-  border-radius: 18px;
-  box-shadow:
-    0 18px 48px rgba(0,0,0,.45),
-    inset 0 0 0 1px rgba(255,255,255,.04);
-  backdrop-filter: saturate(160%) blur(12px);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
-}
 
-/* Blurred cover glow behind content (set via JS to --md-cover) */
-#sermonModal .modal-content::before{
-  content:"";
-  position:absolute; inset:-32px;
-  background-image: var(--md-cover, none);
-  background-size: cover; background-position: center;
-  filter: blur(28px) saturate(1.18) brightness(.65);
-  opacity: .26;
-  transform: scale(1.06);
-  transition: background-image .25s ease, opacity .25s ease;
-  pointer-events: none;
-}
-
-/* Subtle accent gradients over the glass for depth */
-#sermonModal .modal-content::after{
-  content:"";
-  position:absolute; inset:0;
-  background:
-    radial-gradient(900px 600px at -10% -10%, rgba(123,140,255,.16), transparent 40%),
-    radial-gradient(900px 600px at 110% -10%, rgba(210,72,255,.12), transparent 42%);
-  pointer-events: none;
-}
-
-#sermonModal .modal-header,
-#sermonModal .modal-footer{
-  background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
-  border: 0;
-}
-
-#sermonModal .modal-title{ font-weight: 800; letter-spacing: .2px; }
-#sermonModal .btn-close{ filter: invert(1) contrast(1.2); opacity:.9; }
-
-/* Cover with animated ring */
-#sermonModal #md-cover{
-  width:160px; height:160px; object-fit:cover; border-radius:16px;
-  background:#0d1222; border:1px solid var(--ring-2);
-  position: relative; z-index:1;
-  box-shadow: 0 10px 28px rgba(0,0,0,.35);
-}
-#sermonModal #md-cover::after{
-  content:""; position:absolute; inset:-2px; border-radius:18px; pointer-events:none;
-  background: conic-gradient(from 0deg, var(--accent), var(--accent-2), var(--accent));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  padding: 2px; opacity:.65; filter: blur(.2px);
-  animation: mdSpin 6s linear infinite;
-}
-@keyframes mdSpin { to { transform: rotate(360deg); } }
-
-/* Meta + tags */
-#sermonModal #md-meta{ color: var(--muted); }
-#sermonModal #md-tags .badge{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.18);
-  color:#dfe3ff;
-}
-
-/* Buttons: solid gradient primary, soft outlines for secondary */
-#sermonModal .btn-primary{
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  border: 0; color:#fff;
-  box-shadow: 0 8px 20px rgba(123,140,255,.28);
-}
-#sermonModal .btn-primary:hover{ filter: brightness(1.06); }
-
-#sermonModal .btn-outline-light{
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.22);
-  color: var(--ink);
-}
-#sermonModal .btn-outline-light:hover{ background: rgba(255,255,255,.10); }
-
-#sermonModal .btn-outline-secondary{
-  border: 1px solid rgba(255,255,255,.18);
-  color: var(--muted);
-  background: rgba(255,255,255,.03);
-}
-#sermonModal .btn-outline-secondary:hover{ background: rgba(255,255,255,.08); color:#fff; }
-
-/* Description */
-#sermonModal #md-desc{
-  color: var(--ink);
-  opacity:.95;
-}
-
-/* Loading skeleton (applies when we add .is-loading on the modal) */
-#sermonModal.is-loading #md-title{ position:relative; color:transparent; }
-#sermonModal.is-loading #md-title::after,
-#sermonModal.is-loading #md-meta::after,
-#sermonModal.is-loading #md-desc::after{
-  content:""; display:block; height:1em; border-radius:6px; margin:.25rem 0;
-  background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.12), rgba(255,255,255,.06));
-  background-size: 280% 100%; animation: shimmer 1.2s infinite linear;
-}
-#sermonModal.is-loading #md-desc::after{ height:3.2em; }
-#sermonModal.is-loading #md-cover{ background:#0d1222; }
-#sermonModal.is-loading #md-cover::after{ opacity:.2; animation: mdSpin 12s linear infinite; }
-
-@keyframes shimmer { 0%{ background-position: 200% 0 } 100%{ background-position: -80% 0 } }
-/* Responsive sermon cards */
-.lot-card .lot-thumb{ aspect-ratio: 16/9; }
-.lot-card .lot-actions{ gap:.35rem; }
-.lot-card .tag-pill{ white-space:nowrap; }
-
-/* Meta line color for consistency */
-.lot-meta{ color: rgba(255,255,255,.75); }
-
-/* Phone tweaks */
-@media (max-width: 575.98px){
-  .lot-card{ border-radius:12px; }
-  .lot-card .lot-thumb{ aspect-ratio: 1.2 / 1; }              /* slightly taller on phones */
-  .lot-card .lot-actions .btn{ padding: .35rem .5rem; }
-  .lot-card .lot-overlay{ padding:.45rem .5rem; }
-  .lot-card .lot-overlay .btn{ padding:.25rem .5rem; font-size:.8rem; }
-
-  /* Bottom action row: labels hidden on phones (icons only) */
-  .lot-card .actions-label{ display:none; }
-  .lot-card .btn{ border-radius:10px; }
-}
-
-/* Tablet (md) tweaks */
-@media (min-width: 576px) and (max-width: 991.98px){
-  .lot-card .lot-thumb{ aspect-ratio: 16/9; }
-  .lot-card .btn{ padding:.35rem .6rem; }
-}
-
-/* Large screens: allow more columns to breathe */
-@media (min-width: 1400px){
-  .lot-card .lot-thumb{ aspect-ratio: 16/9; }
-}
-
+  @media (max-width: 575.98px){
+    .lot-card{ border-radius:12px; }
+    .lot-thumb{ aspect-ratio: 4/3; }
+    .lot-actions .btn{ padding:.35rem .5rem; }
+    .lot-overlay .btn{ padding:.25rem .5rem; font-size:.82rem; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-
-<div class="container py-4" id="pageRoot" data-api="{% url 'stream:sermons_list_json' %}">
-  <div class="row g-4">
-    <!-- Sidebar (laptop+) -->
-    <aside class="col-lg-3 d-none d-lg-block">
-      <div class="sidebar-sticky">
-        <!-- Search Card -->
-        <div class="sidebar-card p-3 mb-3" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;">
-          <h6 class="mb-2">Search</h6>
-          <form id="searchLeft" class="d-flex gap-2" role="search" aria-label="Search sermons">
-            <input class="form-control form-control-sm lot-search" name="q" value="{{ request.GET.q }}" placeholder="Title, speaker, tag…">
-            <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-search"></i></button>
-            <button class="btn btn-outline-light btn-sm" type="button" id="btnClear" title="Clear"><i class="bi bi-x-lg"></i></button>
-          </form>
-        </div>
-
-        <!-- Tags Card -->
-        <div class="sidebar-card p-3 mb-3" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-2">Top Tags</h6>
-            <small class="text-light">most used</small>
-          </div>
-          <div class="d-flex flex-wrap gap-2" id="tagsTop">
-            <!-- filled by JS -->
-          </div>
-          <hr class="my-3" style="border-color:rgba(255,255,255,.08)">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-2">Recent Tags</h6>
-            <small class="text-light">latest uploads</small>
-          </div>
-          <div class="d-flex flex-wrap gap-2" id="tagsRecent">
-            <!-- filled by JS -->
-          </div>
-        </div>
-
-        <!-- Random Picks -->
-        <div class="sidebar-card p-3" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-2">Random Streams</h6>
-            <button class="btn btn-outline-light btn-sm" id="btnShuffleSidebar" title="Shuffle"><i class="bi bi-shuffle"></i></button>
-          </div>
-          <ul class="list-group list-group-flush" id="randomList" style="--bs-list-group-color:#e6edf3;--bs-list-group-bg:transparent;--bs-list-group-border-color:rgba(255,255,255,.08)">
-            <!-- filled by JS -->
-          </ul>
+<div class="container section-gap" id="pageRoot" data-api="{% url 'stream:sermons_list_json' %}">
+  <div class="page-hero library-hero mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+      <div>
+        <span class="eyebrow"><i class="bi bi-journal-music"></i> Stream library</span>
+        <h1 class="mb-2">Past Streams</h1>
+        <p class="lede mb-3">Browse sermons, testimonies, and worship sets. Queue messages without leaving the page and keep listening as you move around the site.</p>
+        <div class="hero-actions">
+          <button class="btn btn-brand" type="button" data-bs-toggle="offcanvas" data-bs-target="#liveDrawer"><i class="bi bi-broadcast-pin"></i> Listen live</button>
+          <a class="btn btn-outline-light" href="#filters"><i class="bi bi-funnel"></i> Jump to filters</a>
+          {% if request.user.is_staff %}
+            <a class="btn btn-soft" href="{% url 'stream:upload_sermon' %}"><i class="bi bi-upload"></i> Upload</a>
+          {% endif %}
         </div>
       </div>
-    </aside>
-
-   <style>
-    /* HERO */
-    header{
-      position:relative; overflow:hidden; isolation:isolate;
-      background:linear-gradient(135deg, rgba(13,27,42,.9), rgba(26,46,79,.9));
-      width: 100%;
-    }
-    .hero{
-      min-height:30vh;width: 100%; display:grid; place-items:center; text-align:center; position:relative;
-    }
-    .hero-bg, .hero-bg.next{
-      position:absolute; inset:0; background-size:cover; background-position:center;
-      filter:brightness(.55) saturate(1.1); transition:opacity 1.1s ease; opacity:1; z-index:-2;
-    }
-    .hero-bg.next{opacity:0}
-    .hero-gradient{
-      position:absolute; inset:0; z-index:-1;
-      background:
-        radial-gradient(60% 80% at 20% 10%, rgba(106,125,255,.35), transparent 60%),
-        radial-gradient(70% 80% at 80% 5%, rgba(210,72,255,.3), transparent 60%);
-      mix-blend-mode:screen; animation:glow 12s ease-in-out infinite alternate;
-    }
-    @keyframes glow{from{opacity:.6} to{opacity:.9}}
-    .logo{height:56px}
-    .brand{font-weight:800; letter-spacing:.5px}
-    .sub{opacity:.85}
-   </style>
-    <!-- Main grid -->
-    <section class="col-12 col-lg-9">
-      
-      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-        <header>
-        <div class="hero">
-          <div class="hero-bg" id="bgA" style="background-image:url({% static 'assets/worship.png' %})"></div>
-          <div class="hero-bg next" id="bgB" style="background-image:url({% static 'assets/congregation.png' %})"></div>
-          <div class="hero-gradient"></div>
-
-          <div class="container text-center position-relative">
-            <img class="logo mb-3" src="{% static 'assets/LOT-LOGO-PNG-WHITE-2.png' %}" alt="Layers of Truth" />
-            <h1 class="brand mb-2">Layers of Truth</h1>
-            <p class="sub mb-0">Service Audio Stream</p>
-          </div>
-        </div>
-      </header>
-        <!-- Mobile search -->
-        <form id="searchTop" class="d-flex d-lg-none gap-2 w-100" role="search" aria-label="Search sermons">
-          <input class="form-control lot-search" style="min-width:220px" name="q" value="{{ request.GET.q }}" placeholder="Search…">
-          <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
-        </form>
+      <div class="d-flex flex-column gap-2 align-items-start">
+        <span class="stat-pill"><i class="bi bi-collection-play"></i> {{ page_obj.paginator.count }} items</span>
+        {% if q %}
+          <span class="stat-pill"><i class="bi bi-search"></i> Filtered: {{ q }}</span>
+        {% endif %}
       </div>
+    </div>
+  </div>
 
-      <!-- GRID (server-rendered fallback for SEO) -->
+  <div class="filters-card p-3 p-md-4" id="filters">
+    <form id="filtersForm" class="filter-rail" method="get">
+      <div class="pill-input">
+        <i class="bi bi-search"></i>
+        <input type="search" name="q" value="{{ q }}" placeholder="Search title, speaker, or tag">
+      </div>
+      <div class="pill-input">
+        <i class="bi bi-calendar-event"></i>
+        <select name="year" aria-label="Filter by year">
+          <option value="">Any year</option>
+          {% for y in years %}
+            <option value="{{ y }}" {% if active_year|stringformat:"s" == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="pill-input">
+        <i class="bi bi-person"></i>
+        <select name="speaker" aria-label="Filter by speaker">
+          <option value="">Any speaker</option>
+          {% for sp in top_speakers %}
+            <option value="{{ sp.speaker }}" {% if active_speaker == sp.speaker %}selected{% endif %}>{{ sp.speaker }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="hidden" name="tag" id="tagInput" value="{{ active_tag }}">
+      <div class="d-flex gap-2 align-items-stretch">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-play"></i> Apply</button>
+        <button class="btn btn-outline-light" type="button" id="filtersClear"><i class="bi bi-x-lg"></i></button>
+      </div>
+    </form>
+    <div class="active-filters mt-3">
+      {% if q %}<button class="chip" type="button" data-clear="q"><i class="bi bi-search"></i> {{ q }} <i class="bi bi-x-lg"></i></button>{% endif %}
+      {% if active_tag %}<button class="chip" type="button" data-clear="tag"><i class="bi bi-tag"></i> #{{ active_tag }} <i class="bi bi-x-lg"></i></button>{% endif %}
+      {% if active_year %}<button class="chip" type="button" data-clear="year"><i class="bi bi-calendar-event"></i> {{ active_year }} <i class="bi bi-x-lg"></i></button>{% endif %}
+      {% if active_speaker %}<button class="chip" type="button" data-clear="speaker"><i class="bi bi-person"></i> {{ active_speaker }} <i class="bi bi-x-lg"></i></button>{% endif %}
+      {% if q or active_tag or active_year or active_speaker %}
+        <button class="chip danger" type="button" id="clearAll"><i class="bi bi-trash3"></i> Clear all</button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4 section-gap">
+    <div class="col-12 col-xl-8">
       <div class="row g-3" id="sermonGrid">
         {% for s in object_list %}
-          <div class="col-12 col-sm-6 col-xl-4">
+          <div class="col-12 col-sm-6">
             <div class="lot-card h-100 position-relative" data-slug="{{ s.slug }}">
               <div class="lot-thumb">
                 {% if s.cover %}
@@ -377,21 +210,19 @@
                   <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="{{ s.slug }}"><i class="bi bi-box-arrow-up-right"></i> Details</button>
                 </div>
               </div>
-
-              <div class="p-3" style="display:flex;flex-direction: column;justify-content: space-between;height: 220px;">
+              <div class="p-3 d-flex flex-column gap-2 h-100">
                 <div>
-                  <div class="fw-bold text-truncate" title="{{ s.title }}">{{ s.title | truncatechars:30 }}</div>
-                  <div class="text-light small mb-2" style="font-size:12px ;">{{ s.speaker| truncatechars:20 }} • {{ s.date|date:"M j, Y" }}</div>
+                  <div class="fw-bold text-truncate" title="{{ s.title }}">{{ s.title }}</div>
+                  <div class="meta-line">{{ s.speaker }} · {{ s.date|date:"M j, Y" }}</div>
                 </div>
                 {% if s.tags_list %}
-                  <div class="mb-2">
+                  <div class="d-flex flex-wrap gap-1">
                     {% for t in s.tags_list %}
                       <span class="tag-pill">#{{ t }}</span>
                     {% endfor %}
                   </div>
                 {% endif %}
-
-                <div class="d-flex gap-1">
+                <div class="d-flex flex-wrap gap-2 mt-auto">
                   <button class="btn btn-primary btn-sm js-play-now" data-slug="{{ s.slug }}"><i class="bi bi-play-fill"></i> Play</button>
                   <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="{{ s.slug }}"><i class="bi bi-plus-lg"></i> Queue</button>
                   <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="{{ s.slug }}">Details</button>
@@ -406,7 +237,6 @@
         {% endfor %}
       </div>
 
-      <!-- PAGINATION (JS will replace contents; keep as fallback) -->
       {% if is_paginated %}
       <nav class="mt-3" aria-label="Pagination" id="paginationBar">
         <ul class="pagination">
@@ -420,149 +250,129 @@
         </ul>
       </nav>
       {% endif %}
-    </section>
+    </div>
+
+    <aside class="col-12 col-xl-4">
+      <div class="glass-card p-3 p-md-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="m-0 d-flex align-items-center gap-2"><i class="bi bi-stars"></i> Quick picks</h6>
+          <button class="btn btn-outline-light btn-sm" id="quickShuffle"><i class="bi bi-shuffle"></i></button>
+        </div>
+        <ul class="quick-list" id="quickList">
+          <li class="text-muted small">Loading picks…</li>
+        </ul>
+      </div>
+
+      <div class="glass-card p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="m-0 d-flex align-items-center gap-2"><i class="bi bi-tags"></i> Popular tags</h6>
+          <small class="text-muted">tap to filter</small>
+        </div>
+        <div class="d-flex flex-wrap gap-2" id="tagCloud">
+          {% if top_tags %}
+            {% for tag,count in top_tags %}
+              <button class="chip js-filter-tag" type="button" data-tag="{{ tag }}">#{{ tag }}</button>
+            {% endfor %}
+          {% else %}
+            <span class="text-muted small">No tags yet.</span>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
-{{ block.super }}
+{% endblock %}
+
+{% block scripts %}
 <script>
 (function(){
-  const root = document.getElementById('pageRoot');
-  const API  = root?.dataset.api;
-  const grid = document.getElementById('sermonGrid');
-  const pager= document.getElementById('paginationBar');
+  const form = document.getElementById('filtersForm');
+  const tagInput = document.getElementById('tagInput');
+  const clearBtn = document.getElementById('filtersClear');
+  const clearAll = document.getElementById('clearAll');
+  const tagCloud = document.getElementById('tagCloud');
+  const quickList = document.getElementById('quickList');
+  const quickShuffle = document.getElementById('quickShuffle');
+  const summaryApi = "{% url 'stream:sidebar_summary_json' %}";
 
-  if(!API || !grid) return;
+  const getParams = () => {
+    const fd = new FormData(form);
+    return Object.fromEntries(fd.entries());
+  };
 
-  // Helpers
-  const esc = (s)=> (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  const tagHTML = (tags)=> (tags||[]).map(t=>`<span class="tag-pill">#${esc(t)}</span>`).join("");
-
-function cardHTML(it){
-  return `
-  <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xxl-3">  <!-- 1/2/2/3/4 columns -->
-    <div class="lot-card h-100 position-relative" data-slug="${esc(it.slug)}">
-      <div class="lot-thumb">
-        ${it.cover ? `<img src="${esc(it.cover)}" alt="${esc(it.title)}" loading="lazy" decoding="async">` : ``}
-        <div class="lot-actions">
-          <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play now" aria-label="Play now">
-            <i class="bi bi-play-fill"></i>
-          </button>
-          <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Add to queue" aria-label="Add to queue">
-            <i class="bi bi-plus-lg"></i>
-          </button>
-        </div>
-        <div class="lot-overlay">
-          <span class="lot-chip"><i class="bi bi-clock-history"></i> ${esc(it.duration_hm || "—")}</span>
-          <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" aria-label="Details">
-            <i class="bi bi-box-arrow-up-right"></i> <span class="d-none d-sm-inline">Details</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="p-3">
-        <div class="fw-bold text-truncate" title="${esc(it.title)}">${esc(it.title)}</div>
-        <div class="lot-meta small mb-2">${esc(it.speaker||"")} • ${esc(it.date_display||"")}</div>
-
-        ${it.tags && it.tags.length ? `<div class="mb-2">${tagHTML(it.tags)}</div>` : ``}
-
-        <div class="d-flex gap-2 flex-wrap">
-          <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" aria-label="Play">
-            <i class="bi bi-play-fill"></i> <span class="actions-label">Play</span>
-          </button>
-          <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" aria-label="Queue">
-            <i class="bi bi-plus-lg"></i> <span class="actions-label">Queue</span>
-          </button>
-          <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" aria-label="Details">
-            <i class="bi bi-box-arrow-up-right"></i> <span class="actions-label">Details</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>`;
-}
-
-
-  function pagerHTML(page, pages, hasPrev, hasNext){
-    return `
-      <ul class="pagination">
-        ${hasPrev ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page-1}">Prev</a></li>` : ``}
-        <li class="page-item disabled"><span class="page-link">Page ${page} of ${pages}</span></li>
-        ${hasNext ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page+1}">Next</a></li>` : ``}
-      </ul>`;
-  }
-
-  async function load(params, push=true){
-    const url = new URL(API, location.origin);
-    Object.entries(params).forEach(([k,v])=>{
-      if(v!==undefined && v!==null && String(v).trim()!=="") url.searchParams.set(k, v);
-    });
-    const res = await fetch(url.toString(), {credentials:"same-origin"});
-    const data = await res.json();
-
-    // Render grid
-    grid.innerHTML = data.items.map(cardHTML).join("") || `<div class="col"><div class="alert alert-secondary">No sermons yet.</div></div>`;
-
-    // Render pager
-    if(pager){
-      pager.innerHTML = pagerHTML(data.page, data.pages, data.has_prev, data.has_next);
-    }
-
-    // Update URL (no reload)
-    if(push){
-      const qs = url.searchParams.toString();
-      history.pushState(data, "", `?${qs}`);
-      window.scrollTo({top:0, behavior:"smooth"});
-    }
-  }
-
-  // Intercept search forms
-  function hookSearch(formId){
-    const form = document.getElementById(formId);
+  async function apply(params = {}, resetPage = true){
     if(!form) return;
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const q = form.querySelector('[name="q"]')?.value || "";
-      load({q, page:1});
-    });
+    const next = { ...getParams(), ...params };
+    if(resetPage) next.page = 1;
+
+    if(window.spaLoad){
+      await window.spaLoad(next);
+    }else{
+      Object.entries(next).forEach(([k,v])=>{
+        const input = form.querySelector(`[name="${k}"]`);
+        if(input) input.value = v;
+      });
+      form.submit();
+    }
   }
-  hookSearch('searchLeft');
-  hookSearch('searchTop');
 
-  // Intercept quick filters
-  root.addEventListener('click', (e)=>{
-    const qf = e.target.closest('.js-quick');
-    if(qf){
+  form?.addEventListener('submit', (e)=>{ e.preventDefault(); apply(); });
+  clearBtn?.addEventListener('click', ()=> apply({ q:'', year:'', speaker:'', tag:'' }));
+  clearAll?.addEventListener('click', ()=> apply({ q:'', year:'', speaker:'', tag:'' }));
+
+  document.addEventListener('click', (e)=>{
+    const tagBtn = e.target.closest('.js-filter-tag');
+    if(tagBtn){
       e.preventDefault();
-      const q = qf.dataset.q || "";
-      load({q, page:1});
+      if(tagInput) tagInput.value = tagBtn.dataset.tag || '';
+      apply({ tag: tagInput?.value || '' });
       return;
     }
-    const pg = e.target.closest('.js-page');
-    if(pg){
+    const clearChip = e.target.closest('[data-clear]');
+    if(clearChip){
       e.preventDefault();
-      const page = parseInt(pg.dataset.page||"1",10);
-      const url = new URL(location.href);
-      const q = url.searchParams.get('q') || "";
-      const tag = url.searchParams.get('tag') || "";
-      const year = url.searchParams.get('year') || "";
-      const speaker = url.searchParams.get('speaker') || "";
-      load({q, tag, year, speaker, page});
-      return;
+      const field = clearChip.dataset.clear;
+      const input = form?.querySelector(`[name="${field}"]`);
+      if(input) input.value = '';
+      apply({ [field]: '' });
     }
   });
 
-  // Make entire thumbnail click open details (no navigation)
-  root.addEventListener('click', (e)=>{
-    const thumb = e.target.closest('.lot-card .lot-thumb');
-    if(thumb && !e.target.closest('.btn')){
-      const slug = thumb.closest('.lot-card')?.dataset.slug;
-      if(!slug) return;
-      const btn = thumb.closest('.lot-card').querySelector('.js-open-details');
-      btn?.dispatchEvent(new Event('click', {bubbles:true}));
-    }
-  });
+  async function loadSummary(){
+    if(!summaryApi) return;
+    try{
+      const res = await fetch(summaryApi, { credentials:'same-origin' });
+      const data = await res.json();
 
-  // Visual "Queued ✓"
+      if(tagCloud && data.top_tags){
+        tagCloud.innerHTML = data.top_tags.slice(0,12).map(t =>
+          `<button class="chip js-filter-tag" type="button" data-tag="${t.name}">#${t.name}</button>`
+        ).join("") || `<span class="text-muted small">No tags yet.</span>`;
+      }
+
+      if(quickList && data.random_items){
+        quickList.innerHTML = data.random_items.map(it => `
+          <li class="quick-item">
+            <img src="${it.cover || ''}" alt="">
+            <div class="flex-grow-1">
+              <div class="fw-semibold text-truncate">${it.title}</div>
+              <div class="text-muted small">${it.speaker || ''} ${it.duration_hm ? '· '+it.duration_hm : ''}</div>
+            </div>
+            <div class="d-flex gap-1">
+              <button class="btn btn-primary btn-sm js-play-now" data-slug="${it.slug}" title="Play"><i class="bi bi-play-fill"></i></button>
+              <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${it.slug}" title="Queue"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </li>
+        `).join("") || `<li class="text-muted small">No picks yet.</li>`;
+      }
+    }catch(err){
+      if(quickList){ quickList.innerHTML = `<li class="text-muted small">Could not load picks.</li>`; }
+    }
+  }
+  quickShuffle?.addEventListener('click', (e)=>{ e.preventDefault(); loadSummary(); });
+  loadSummary();
+
+  // Quick queued feedback
   document.addEventListener('click', (e)=>{
     const addBtn = e.target.closest('.js-add-queue');
     if(!addBtn) return;
@@ -570,26 +380,13 @@ function cardHTML(it){
     if(!card) return;
     const burst = document.createElement('div');
     burst.className = 'queued-burst';
-    burst.textContent = 'Queued ✓';
+    burst.textContent = 'Queued';
     card.appendChild(burst);
-    setTimeout(()=>burst.remove(), 1100);
-  });
-
-  // Back/forward restore without reload
-  window.addEventListener('popstate', (e)=>{
-    const state = e.state;
-    if(state && state.items){
-      grid.innerHTML = state.items.map(cardHTML).join("");
-      if(pager){
-        pager.innerHTML = pagerHTML(state.page, state.pages, state.has_prev, state.has_next);
-      }
-    }else{
-      // If no state, reload current query via API
-      const url = new URL(location.href);
-      load(Object.fromEntries(url.searchParams.entries()), false);
-    }
+    setTimeout(()=> burst.remove(), 1100);
   });
 })();
+
+// Details modal (glass)
 document.addEventListener('click', async (e)=>{
   const btn = e.target.closest('.js-open-details');
   if(!btn) return;
@@ -601,14 +398,12 @@ document.addEventListener('click', async (e)=>{
   const modalEl = document.getElementById('sermonModal');
   const content = modalEl.querySelector('.modal-content');
 
-  // 👉 show modal immediately with loading state
   modalEl.classList.add('is-loading');
   bootstrap.Modal.getOrCreateInstance(modalEl).show();
 
-  // reset placeholders & remove previous background
   content.style.setProperty('--md-cover', 'none');
-  document.getElementById('md-title').textContent = '—';
-  document.getElementById('md-meta').textContent = '—';
+  document.getElementById('md-title').textContent = '';
+  document.getElementById('md-meta').textContent = '';
   document.getElementById('md-tags').innerHTML = '';
   document.getElementById('md-desc').textContent = '';
 
@@ -617,18 +412,14 @@ document.addEventListener('click', async (e)=>{
     if(!res.ok) throw new Error('Failed');
     const s = await res.json();
 
-    // 👉 set blurred background from cover
     if(s.cover){
       content.style.setProperty('--md-cover', `url("${s.cover}")`);
       const img = document.getElementById('md-cover');
-      img.src = s.cover;
+      if(img) img.src = s.cover;
     }
-
-    document.getElementById('md-title').textContent = s.title || '—';
-    document.getElementById('md-meta').textContent  = `${s.speaker || ''} • ${s.date_display || ''} • ${s.duration_hm || ''}`;
-    document.getElementById('md-tags').innerHTML    = (s.tags||[]).map(t=>(
-      `<span class="badge rounded-pill me-1 mb-1">#${t}</span>`
-    )).join('');
+    document.getElementById('md-title').textContent = s.title || '';
+    document.getElementById('md-meta').textContent  = `${s.speaker || ''} · ${s.date_display || ''} · ${s.duration_hm || ''}`;
+    document.getElementById('md-tags').innerHTML    = (s.tags||[]).map(t=>`<span class="badge rounded-pill me-1 mb-1">#${t}</span>`).join('');
     document.getElementById('md-desc').textContent  = s.description || '';
 
     const play  = document.getElementById('md-play');
@@ -654,158 +445,8 @@ document.addEventListener('click', async (e)=>{
     console.error(err);
     alert('Could not load details.');
   }finally{
-    // 👉 remove loading shimmer
     modalEl.classList.remove('is-loading');
   }
 });
 </script>
-<script>
-(function(){
-  const root   = document.getElementById('pageRoot');
-  const API    = root?.dataset.api; // sermons_list_json
-  const SIDEBAR_API = "{% url 'stream:sidebar_summary_json' %}";
-  if(!root || !API) return;
-
-  const grid   = document.getElementById('sermonGrid');
-  const pager  = document.getElementById('paginationBar');
-  const fLeft  = document.getElementById('searchLeft');
-  const btnClr = document.getElementById('btnClear');
-
-  const tagsTop    = document.getElementById('tagsTop');
-  const tagsRecent = document.getElementById('tagsRecent');
-  const randomList = document.getElementById('randomList');
-  const btnShuffle = document.getElementById('btnShuffleSidebar');
-
-  // ----- helpers -----
-  const esc = (s)=> (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  const tagBtn = (t) => `<button class="btn btn-outline-light btn-sm js-quick" data-q="${esc(t)}" type="button">#${esc(t)}</button>`;
-
-  function cardHTML(it){
-    return `
-      <div class="col-12 col-sm-6 col-xl-4">
-        <div class="lot-card h-100 position-relative" data-slug="${esc(it.slug)}">
-          <div class="lot-thumb">
-            ${it.cover ? `<img src="${esc(it.cover)}" alt="${esc(it.title)}" loading="lazy" decoding="async">` : ``}
-            <div class="lot-actions">
-              <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play now"><i class="bi bi-play-fill"></i></button>
-              <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Add to queue"><i class="bi bi-plus-lg"></i></button>
-            </div>
-            <div class="lot-overlay">
-              <span class="lot-chip"><i class="bi bi-clock-history"></i> ${esc(it.duration_hm || "—")}</span>
-              <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}"><i class="bi bi-box-arrow-up-right"></i> Details</button>
-            </div>
-          </div>
-          <div class="p-3">
-            <div class="fw-bold text-truncate" title="${esc(it.title)}">${esc(it.title)}</div>
-            <div class="text-light small mb-2">${esc(it.speaker||"")} • ${esc(it.date_display||"")}</div>
-            ${it.tags && it.tags.length ? `<div class="mb-2">${it.tags.map(t=>`<span class="tag-pill">#${esc(t)}</span>`).join("")}</div>` : ``}
-            <div class="d-flex gap-1">
-              <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}"><i class="bi bi-play-fill"></i> Play</button>
-              <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}"><i class="bi bi-plus-lg"></i> Queue</button>
-              <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}">Details</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  }
-
-  function pagerHTML(page, pages, hasPrev, hasNext){
-    return `
-      <ul class="pagination">
-        ${hasPrev ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page-1}">Prev</a></li>` : ``}
-        <li class="page-item disabled"><span class="page-link">Page ${page} of ${pages}</span></li>
-        ${hasNext ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page+1}">Next</a></li>` : ``}
-      </ul>`;
-  }
-
-  async function loadGrid(params, push=true){
-    const url = new URL(API, location.origin);
-    Object.entries(params||{}).forEach(([k,v])=>{ if(v!==undefined && v!==null && String(v).trim()!=="") url.searchParams.set(k, v); });
-    const res = await fetch(url, {credentials:"same-origin"});
-    const data = await res.json();
-
-    grid.innerHTML = data.items.map(cardHTML).join("") || `<div class="col"><div class="alert alert-secondary">No sermons yet.</div></div>`;
-    if(pager){ pager.innerHTML = pagerHTML(data.page, data.pages, data.has_prev, data.has_next); }
-
-    if(push){
-      const qs = url.searchParams.toString();
-      history.pushState(data, "", `?${qs}`);
-      window.scrollTo({top:0, behavior:"smooth"});
-    }
-  }
-
-  async function loadSidebar(){
-    const res = await fetch(SIDEBAR_API, {credentials:"same-origin"});
-    const data = await res.json();
-
-    // Top tags
-    tagsTop.innerHTML = (data.top_tags || []).slice(0, 12).map(x => tagBtn(x.name)).join("") || `<small class="text-light">No tags yet.</small>`;
-    // Recent tags
-    tagsRecent.innerHTML = (data.recent_tags || []).slice(0, 12).map(x => tagBtn(x.name)).join("") || `<small class="text-light">No tags yet.</small>`;
-
-    // Random picks
-    randomList.innerHTML = (data.random_items || []).map(it => `
-      <li class="list-group-item px-0 py-2">
-        <div class="d-flex align-items-center gap-2">
-          <img src="${esc(it.cover||'')}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0b1222">
-          <div class="flex-grow-1" style="max-width:60%;">
-            <div class="small fw-semibold text-truncate" style="font-size:12px;">${esc(it.title)}</div>
-            <div class="text-light small"style="font-size:9px">${esc(it.speaker||'')} • ${esc(it.duration_hm||'')}</div>
-          </div>
-          <div class="d-flex gap-1">
-            <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play"><i class="bi bi-play-fill"></i></button>
-            <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Queue"><i class="bi bi-plus-lg"></i></button>
-            <!-- <button class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" title="Details"><i class="bi bi-box-arrow-up-right"></i></button> -->
-          </div>
-        </div>
-      </li>
-    `).join("");
-  }
-
-  // Search submit (no navigation)
-  fLeft?.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const q = fLeft.querySelector('[name="q"]')?.value || "";
-    loadGrid({ q, page:1 });
-  });
-
-  // Clear button
-  btnClr?.addEventListener('click', ()=>{
-    const input = fLeft.querySelector('[name="q"]');
-    if(input) input.value = "";
-    loadGrid({ q:"", page:1 });
-  });
-
-  // Quick tags and pagination clicks
-  document.addEventListener('click', (e)=>{
-    const qbtn = e.target.closest('.js-quick');
-    if(qbtn){ e.preventDefault(); loadGrid({ q: qbtn.dataset.q || "", page:1 }); return; }
-
-    const p = e.target.closest('.js-page');
-    if(p){ e.preventDefault(); 
-      const url = new URL(location.href);
-      const q = url.searchParams.get('q') || "";
-      loadGrid({ q, page: parseInt(p.dataset.page||"1",10) });
-    }
-  });
-
-  // Shuffle random 3
-  btnShuffle?.addEventListener('click', async ()=>{
-    await loadSidebar();
-  });
-
-  // On first load
-  loadSidebar();
-})();
-document.addEventListener('click', (e)=>{
-  const thumb = e.target.closest('.lot-card .lot-thumb');
-  if(!thumb || e.target.closest('.btn')) return;
-  const slug = thumb.closest('.lot-card')?.dataset.slug;
-  if(!slug) return;
-  const btn = thumb.closest('.lot-card').querySelector('.js-open-details');
-  btn?.dispatchEvent(new Event('click', {bubbles:true}));
-});
-
-</script>
-
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ object.title }} — Layers of Truth{% endblock %}
+{% block title %}{{ object.title }} | Layers of Truth{% endblock %}
 
 {% block meta %}
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
@@ -16,153 +16,130 @@
 
 {% block head %}
 <style>
-  .hero {
-    position: relative;
-    border-radius: 16px;
-    overflow: hidden;
+  .detail-hero{
     background:
-      radial-gradient(800px 500px at 10% -10%, rgba(123,140,255,.20), transparent 40%),
-      radial-gradient(800px 600px at 120% 0%, rgba(210,72,255,.12), transparent 42%),
-      #0b1222;
-    min-height: 260px;
-  }
-  .hero::before{
-    content:"";
-    position:absolute; inset:0;
-    {% if object.cover %}
-      background-image: url('{{ object.cover.url }}');
-      background-size: cover; background-position: center;
-      filter: blur(18px) saturate(1.1) brightness(.6);
-      transform: scale(1.08);
-    {% else %}
-      background: linear-gradient(135deg,#10182e,#0b1222);
-    {% endif %}
-  }
-  .hero-overlay{
-    position:relative; z-index:1;
-    padding: 1.25rem;
-    background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.45));
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;
+      radial-gradient(120% 120% at -10% -20%, rgba(123,140,255,.2), transparent 50%),
+      radial-gradient(110% 110% at 120% -10%, rgba(210,72,255,.14), transparent 52%),
+      linear-gradient(135deg, rgba(15,22,40,.94), rgba(10,16,28,.9));
   }
   .hero-img{
-    width: 180px; height: 180px; object-fit: cover; border-radius: 14px;
-    border:1px solid rgba(255,255,255,.12);
-    box-shadow: 0 10px 28px rgba(0,0,0,.35);
-    background:#111;
+    width:200px; height:200px; object-fit:cover; border-radius:16px;
+    border:1px solid rgba(255,255,255,.14); background:#111;
+    box-shadow:0 14px 34px rgba(0,0,0,.35);
   }
-  .meta{ color:#a8b3c7 }
   .tag-pill{
-    display:inline-block; padding:.2rem .55rem; margin:.2rem .25rem 0 0;
-    border-radius:999px; font-size:.75rem; color:#a8b3c7;
+    display:inline-flex; align-items:center; gap:.3rem;
+    padding:.25rem .6rem; border-radius:999px;
+    background: rgba(255,255,255,.06);
     border:1px dashed rgba(255,255,255,.18);
+    color:#dfe3ff; font-size:.82rem;
+  }
+  .meta-line{ color:var(--muted); }
+  .desc-card{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:16px;
+    background: rgba(255,255,255,.04);
+  }
+  .related-card{
+    background: rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px; overflow:hidden;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .related-card:hover{ transform:translateY(-3px); box-shadow:0 14px 30px rgba(0,0,0,.32); }
+  .related-card img{ width:100%; aspect-ratio:16/9; object-fit:cover; }
+  .btn-brand{
+    border:0; border-radius:12px; color:#fff;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    font-weight:800; letter-spacing:.2px;
+    box-shadow:0 10px 26px rgba(123,140,255,.28);
   }
   .btn-soft{
-    background: rgba(255,255,255,.06); color:#e6edf3; border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    background: rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);
+    color:#e6edf3;
   }
-  .btn-soft:hover{ background: rgba(255,255,255,.12); }
-
-  /* subtle motion under the title */
-  .wavebar{
-    height: 4px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.12);
-    position: relative; margin-top:.5rem;
+  @media (max-width: 767.98px){
+    .hero-img{ width:160px; height:160px; }
   }
-  .wavebar::after{
-    content:""; position:absolute; inset:0;
-    background: linear-gradient(90deg, rgba(123,140,255,.0), rgba(123,140,255,.6), rgba(210,72,255,.0));
-    transform: translateX(-100%);
-    animation: wave 2.4s ease-in-out infinite;
-  }
-  @keyframes wave { 0%{ transform:translateX(-100%) } 50%{ transform:translateX(0%) } 100%{ transform:translateX(100%) } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="hero mb-4">
-    <div class="hero-overlay">
-      <div class="row g-4 align-items-center">
-        <div class="col-auto">
-          {% if object.cover %}
-            <img class="hero-img" src="{{ object.cover.url }}" alt="{{ object.title }}">
-          {% else %}
-            <div class="hero-img d-flex align-items-center justify-content-center">
-              <i class="bi bi-music-note-beamed fs-1 text-muted"></i>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="col">
-          <h1 class="h3 mb-1">{{ object.title }}</h1>
-          <div class="meta mb-2">
-            {{ object.speaker }} • {{ object.date|date:"M j, Y" }} • {{ object.duration_hm }}
+<div class="container section-gap">
+  <div class="page-hero detail-hero mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-md-4 text-center text-md-start">
+        {% if object.cover %}
+          <img class="hero-img" src="{{ object.cover.url }}" alt="{{ object.title }}">
+        {% else %}
+          <div class="hero-img d-flex align-items-center justify-content-center">
+            <i class="bi bi-music-note-beamed fs-1 text-muted"></i>
           </div>
-          {% if object.tags_list %}
-            <div class="mb-2">
-              {% for t in object.tags_list %}
-                <span class="tag-pill">#{{ t }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-          <div class="d-flex flex-wrap gap-2 mt-2">
-            <button class="btn btn-primary js-play-now" data-slug="{{ object.slug }}">
-              <i class="bi bi-play-fill"></i> Play now
-            </button>
-            <button class="btn btn-soft js-add-queue" data-slug="{{ object.slug }}">
-              <i class="bi bi-plus-lg"></i> Add to queue
-            </button>
-
-            {% if request.user.is_authenticated %}
-            <form method="post" action="{% url 'stream:library_toggle' %}" class="d-inline">
-              {% csrf_token %}
-              <input type="hidden" name="slug" value="{{ object.slug }}">
-              <button class="btn btn-soft" type="submit"><i class="bi bi-bookmark-plus"></i> Save</button>
-            </form>
-            {% endif %}
-
-            <a href="{{ object.audio.url }}" class="btn btn-soft">
-              <i class="bi bi-download"></i> Download
-            </a>
-            <button class="btn btn-soft" id="copyLinkBtn" data-url="{{ request.build_absolute_uri }}">
-              <i class="bi bi-link-45deg"></i> Copy link
-            </button>
+        {% endif %}
+      </div>
+      <div class="col-md-8">
+        <span class="eyebrow"><i class="bi bi-journal-music"></i> Past stream</span>
+        <h1 class="h3 mb-1">{{ object.title }}</h1>
+        <div class="meta-line mb-2">{{ object.speaker }} · {{ object.date|date:"M j, Y" }}{% if object.duration_hm %} · {{ object.duration_hm }}{% endif %}</div>
+        {% if object.tags_list %}
+          <div class="d-flex flex-wrap gap-1 mb-3">
+            {% for t in object.tags_list %}
+              <span class="tag-pill">#{{ t }}</span>
+            {% endfor %}
           </div>
+        {% endif %}
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-brand js-play-now" data-slug="{{ object.slug }}"><i class="bi bi-play-fill"></i> Play now</button>
+          <button class="btn btn-soft js-add-queue" data-slug="{{ object.slug }}"><i class="bi bi-plus-lg"></i> Add to queue</button>
 
-          <div class="wavebar" aria-hidden="true"></div>
+          {% if request.user.is_authenticated %}
+          <form method="post" action="{% url 'stream:library_toggle' %}" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="slug" value="{{ object.slug }}">
+            <button class="btn btn-soft" type="submit"><i class="bi bi-bookmark-plus"></i> Save</button>
+          </form>
+          {% endif %}
+
+          <a href="{{ object.audio.url }}" class="btn btn-soft">
+            <i class="bi bi-download"></i> Download
+          </a>
+          <button class="btn btn-soft" id="copyLinkBtn" data-url="{{ request.build_absolute_uri }}">
+            <i class="bi bi-link-45deg"></i> Copy link
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   {% if object.description %}
-    <div class="row">
-      <div class="col-12 col-lg-10">
-        <p class="lead">{{ object.description | safe }}</p>
-      </div>
+    <div class="desc-card p-3 p-md-4 mb-4">
+      <p class="lead mb-0">{{ object.description | safe }}</p>
     </div>
   {% endif %}
 
-  <div class="mt-3">
-    <a href="{% url 'stream:past_list' %}" class="btn btn-link btn-sm"><i class="bi bi-arrow-left"></i> Back to Past Streams</a>
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <a href="{% url 'stream:past_list' %}" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left"></i> Back to streams</a>
   </div>
 
   {% if related %}
-    <hr class="my-4">
-    <h5 class="mb-3">You might also like</h5>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="eyebrow">You might also like</span>
+    </div>
     <div class="row g-3">
       {% for s in related %}
       <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card h-100 bg-dark text-white border-0">
+        <div class="related-card h-100">
           {% if s.cover %}
-            <img src="{{ s.cover.url }}" class="card-img-top" alt="{{ s.title }}" style="aspect-ratio:16/9;object-fit:cover;">
+            <img src="{{ s.cover.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
           {% endif %}
-          <div class="card-body">
-            <div class="fw-semibold text-truncate mb-1">{{ s.title }}</div>
-            <div class="text-muted small mb-2">{{ s.speaker }} • {{ s.date|date:"M j, Y" }}</div>
-            <div class="d-flex gap-2">
+          <div class="p-3 d-flex flex-column gap-2 h-100">
+            <div class="fw-semibold text-truncate">{{ s.title }}</div>
+            <div class="text-muted small">{{ s.speaker }} · {{ s.date|date:"M j, Y" }}</div>
+            <div class="d-flex gap-2 mt-auto">
               <button class="btn btn-primary btn-sm js-play-now" data-slug="{{ s.slug }}"><i class="bi bi-play-fill"></i> Play</button>
-              <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="{{ s.slug }}"><i class="bi bi-plus-lg"></i> Queue</button>
-              <a href="{{ s.get_absolute_url }}" class="btn btn-outline-light btn-sm">Open</a>
+              <a class="btn btn-outline-light btn-sm" href="{{ s.get_absolute_url }}"><i class="bi bi-box-arrow-up-right"></i></a>
             </div>
           </div>
         </div>
@@ -174,41 +151,16 @@
 {% endblock %}
 
 {% block scripts %}
-{{ block.super }}
 <script>
-  // Copy link UX
-  const copyBtn = document.getElementById('copyLinkBtn');
-  if(copyBtn){
-    copyBtn.addEventListener('click', async ()=>{
-      try{
-        await navigator.clipboard.writeText(copyBtn.dataset.url);
-        copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied';
-        setTimeout(()=> copyBtn.innerHTML = '<i class="bi bi-link-45deg"></i> Copy link', 1200);
-      }catch(e){ alert('Could not copy link'); }
-    });
-  }
-
-  // Optional: make cover click "Play now"
-  document.querySelectorAll('.hero-img').forEach(img=>{
-    img.addEventListener('click', ()=>{
-      const play = document.querySelector('.js-play-now[data-slug="{{ object.slug }}"]');
-      play?.dispatchEvent(new Event('click', {bubbles:true}));
-    });
+  document.getElementById('copyLinkBtn')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const url = btn.dataset.url || location.href;
+    try{
+      await navigator.clipboard.writeText(url);
+      btn.innerHTML = '<i class="bi bi-check2"></i> Copied';
+      setTimeout(()=> btn.innerHTML = '<i class="bi bi-link-45deg"></i> Copy link', 1200);
+    }catch(err){}
   });
-</script>
-
-{# SEO: structured data #}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "MusicRecording",
-  "name": "{{ object.title|escapejs }}",
-  "byArtist": "{{ object.speaker|escapejs }}",
-  "datePublished": "{{ object.date|date:'Y-m-d' }}",
-  "duration": "PT{{ object.duration_s|default:0 }}S",
-  {% if object.cover %}"image": "{{ object.cover.url }}",{% endif %}
-  "url": "{{ request.build_absolute_uri }}",
-  "inLanguage": "en"
-}
 </script>
 {% endblock %}

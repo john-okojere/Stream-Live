@@ -219,6 +219,107 @@
 }
 @keyframes ocSh{ 0%{background-position:200% 0} 100%{background-position:-80% 0} }
 
+/* === Shared shell elements (heroes, filters, chips) =================== */
+.page-hero{
+  position:relative; overflow:hidden; isolation:isolate;
+  border:1px solid var(--ring); border-radius:18px;
+  padding: clamp(1.4rem, 3vw, 2.2rem);
+  background:
+    radial-gradient(120% 120% at -10% -20%, rgba(123,140,255,.18), transparent 50%),
+    radial-gradient(90% 90% at 110% 0%, rgba(210,72,255,.14), transparent 52%),
+    linear-gradient(135deg, rgba(15,22,40,.9), rgba(12,18,32,.9));
+  box-shadow: 0 18px 42px rgba(0,0,0,.38);
+}
+.page-hero .eyebrow{
+  display:inline-flex; align-items:center; gap:.45rem;
+  padding:.35rem .75rem; border-radius:999px;
+  font-weight:700; letter-spacing:.35px; text-transform:uppercase;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  color: var(--muted);
+}
+.page-hero h1{ margin: .65rem 0 .35rem 0; letter-spacing:.4px; }
+.page-hero .lede{ max-width: 70ch; color: var(--muted); }
+.page-hero .hero-actions{ display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1rem; }
+
+.filter-rail{
+  display:flex; flex-wrap:wrap; gap:.75rem;
+  padding: .9rem;
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.filter-rail .pill-input{
+  position: relative; flex: 1 1 260px;
+}
+.pill-input input, .pill-input select{
+  width:100%; height:100%;
+  padding:.65rem .9rem .65rem 2.2rem;
+  border-radius:12px; border:1px solid var(--ring);
+  background: rgba(8,12,22,.85); color: var(--ink);
+}
+.pill-input .bi{ position:absolute; left:.8rem; top:50%; transform:translateY(-50%); color:var(--muted); }
+.filter-rail .btn{ border-radius:12px; }
+
+.chip{
+  display:inline-flex; align-items:center; gap:.45rem;
+  padding:.35rem .7rem; border-radius:999px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  color: var(--ink); font-weight:600; font-size:.9rem;
+}
+.chip .bi{ opacity:.8; }
+.chip.danger{ border-color: rgba(255,122,122,.4); color:#ffdede; }
+.stat-pill{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.5rem .75rem; border-radius:12px;
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--muted); font-weight:700;
+}
+
+.glass-card{
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  box-shadow: 0 14px 32px rgba(0,0,0,.32);
+}
+
+.micro-badge{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.28rem .5rem; border-radius:10px; font-size:.83rem; font-weight:700;
+  background: rgba(255,255,255,.08); color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+}
+
+.section-gap{ margin-top: clamp(1.5rem, 4vw, 2.75rem); }
+
+/* Live access pill (global) */
+.live-fab{
+  position:fixed; right:16px; bottom: calc(var(--player-h) + 16px);
+  z-index:1045;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.7rem .85rem;
+  width:min(420px, calc(100% - 24px));
+  background: rgba(11,18,34,.92);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  backdrop-filter: saturate(150%) blur(10px);
+  box-shadow:0 18px 38px rgba(0,0,0,.36);
+}
+.live-fab .fab-dot{
+  width:.75rem; height:.75rem; border-radius:50%; background:#ff6a95;
+  box-shadow:0 0 0 0 rgba(255,106,149,.6); animation:lotPulse 1.6s infinite;
+}
+.live-fab.is-offline .fab-dot{ background:#6c757d; box-shadow:none; animation:none; }
+.live-fab .meta{ line-height:1.2; }
+.live-fab .meta .label{ text-transform:uppercase; letter-spacing:.35px; font-weight:800; font-size:.8rem; color:#dfe3ff; }
+.live-fab .meta .status{ color: var(--muted); font-size:.9rem; }
+.live-fab .btn{ border-radius:12px; }
+@media (max-width: 575.98px){
+  .live-fab{ left:12px; right:12px; width:auto; }
+}
+
   </style>
 
   {% block head %}{% endblock %}
@@ -232,7 +333,7 @@
     <div class="container h-100 g-3" style="gap: 10px;">
         <img class="lot-brand-logo" src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth">
         <span class="vr mx-2 opacity-50 d-none d-sm-inline"></span>
-        <button class="lot-brand navbar-brand btn-sm badge-live m" type="button" data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" aria-controls="liveDrawer" title="Listen Live" style="border:none;">
+        <button class="lot-brand navbar-brand btn-sm badge-live m" type="button" data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" data-live-open aria-controls="liveDrawer" title="Listen Live" style="border:none;">
           <i class="bi bi-broadcast-pin"></i>
           <span class="d-none d-sm-inline">Live</span>
           <span class="pulse-dot" aria-hidden="true"></span>
@@ -276,6 +377,20 @@
     </div>
   </nav>
 
+  <!-- Global Live access pill -->
+  <div class="live-fab" id="liveFab" role="status" aria-live="polite">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fab-dot" aria-hidden="true"></span>
+      <div class="meta">
+        <div class="label">Live Stream</div>
+        <div class="status" id="liveFabMeta">Tap to listen</div>
+      </div>
+    </div>
+    <button class="btn btn-light btn-sm" type="button" data-live-open>
+      <i class="bi bi-broadcast-pin"></i> Listen
+    </button>
+  </div>
+
 <!-- Phone Sidebar -->
 <div class="offcanvas offcanvas-start lot-offcanvas" tabindex="-1" id="lotOffcanvas" aria-labelledby="lotOffcanvasLabel">
   <div class="offcanvas-header">
@@ -284,7 +399,7 @@
       <span class="vr mx-2 opacity-50 d-none d-sm-inline"></span>
       <!-- Live button (opens live drawer; no navigation) -->
       <button class="lot-brand navbar-brand btn-sm badge-live" type="button"
-              data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" aria-controls="liveDrawer"
+              data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" data-live-open aria-controls="liveDrawer"
               title="Listen Live" style="border:none;">
         <i class="bi bi-broadcast-pin"></i>
         <span class="d-none d-sm-inline">Live</span>
@@ -688,7 +803,7 @@
 
   function cardHTML(it){
     return `
-    <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xxl-3">
+    <div class="col-12 col-sm-6">
       <div class="lot-card h-100 position-relative" data-slug="${esc(it.slug)}">
         <div class="lot-thumb">
           ${it.cover ? `<img src="${esc(it.cover)}" alt="${esc(it.title)}" loading="lazy" decoding="async">` : ``}
@@ -705,7 +820,7 @@
         </div>
         <div class="p-3">
           <div class="fw-bold text-truncate" title="${esc(it.title)}">${esc(it.title)}</div>
-          <div class="text-light small mb-2">${esc(it.speaker||"")} • ${esc(it.date_display||"")}</div>
+          <div class="text-muted small mb-2">${esc(it.speaker||"")} ${it.date_display ? '| '+esc(it.date_display) : ''}</div>
           ${it.tags && it.tags.length ? `<div class="mb-2">${tagHTML(it.tags)}</div>` : ``}
           <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" aria-label="Play"><i class="bi bi-play-fill"></i> <span class="actions-label">Play</span></button>
@@ -832,9 +947,10 @@
     if(!a) return;
     if (a.href.includes('/past')) {
       e.preventDefault();
-      // keep current query if present; otherwise load page 1
-      const currentQ = (new URL(location.href)).searchParams.get('q') || '';
-      await spaLoad({ q: currentQ, page:1 });
+      // keep current filters if present; otherwise load page 1
+      const params = Object.fromEntries(new URL(location.href).searchParams.entries());
+      params.page = 1;
+      await spaLoad(params);
       hideOffcanvas();
     }
   });
@@ -845,12 +961,53 @@
     if(!link) return;
     e.preventDefault();
     const page = parseInt(link.dataset.page || "1", 10);
-    const q = (new URL(location.href)).searchParams.get('q') || '';
-    await spaLoad({ q, page });
+    const url = new URL(location.href);
+    const params = Object.fromEntries(url.searchParams.entries());
+    params.page = page;
+    await spaLoad(params);
   });
 
   // Expose spaLoad if you want to trigger it elsewhere
   window.spaLoad = spaLoad;
+})();
+</script>
+<script>
+// Global Live access: opens live drawer + polls Radio.co status
+(function(){
+  const liveFab = document.getElementById('liveFab');
+  const liveMeta = document.getElementById('liveFabMeta');
+  const liveButtons = document.querySelectorAll('[data-live-open]');
+  const statusUrl = "https://public.radio.co/stations/05d5829/status";
+
+  function openLiveDrawer(){
+    const el = document.getElementById('liveDrawer');
+    if(!el) return;
+    const inst = bootstrap.Offcanvas.getOrCreateInstance(el);
+    inst.show();
+  }
+
+  liveButtons.forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); openLiveDrawer(); });
+  });
+
+  async function refreshLive(){
+    if(!liveFab || !liveMeta) return;
+    try{
+      const res = await fetch(statusUrl, { cache:'no-store' });
+      if(!res.ok) throw new Error('net');
+      const data = await res.json();
+      const onAir = String(data.status || '').toLowerCase() === 'online';
+      const title = data?.current_track?.title || '';
+      liveMeta.textContent = onAir ? (title || 'Streaming now') : 'Off-air · tap to check';
+      liveFab.classList.toggle('is-offline', !onAir);
+    }catch(err){
+      liveMeta.textContent = 'Tap to listen';
+      liveFab?.classList.remove('is-offline');
+    }
+  }
+
+  refreshLive();
+  setInterval(refreshLive, 60000);
 })();
 </script>
 
