@@ -5,8 +5,9 @@ app_name = "stream"
 
 urlpatterns = [
     path("", views.SermonListView.as_view(), name="past_list"),
-    path("<slug:slug>/", views.SermonDetailView.as_view(), name="past_detail"),
+    path("dashboard/", views.staff_dashboard, name="staff_dashboard"),
     path("upload/", views.upload_sermon, name="upload_sermon"),  # staff-only
+    path("<slug:slug>/", views.SermonDetailView.as_view(), name="past_detail"),
 
     # JSON endpoints
     path("api/sermons/<slug:slug>.json", api.sermon_json, name="sermon_json"),

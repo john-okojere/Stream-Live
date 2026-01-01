@@ -27,6 +27,13 @@ class Sermon(models.Model):
     cover       = models.ImageField(upload_to=cover_upload_to, blank=True, null=True)
     audio       = models.FileField(upload_to=audio_upload_to)
     duration_s  = models.PositiveIntegerField(default=0, help_text="Duration in seconds")
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="uploaded_sermons",
+    )
 
     class Meta:
         ordering = ["-date", "-id"]

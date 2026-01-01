@@ -8,154 +8,497 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0b1222; --panel:rgba(255,255,255,.06); --ring:rgba(255,255,255,.15);
+    :root {
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.8);
+      --primary: #3b82f6;
+      --secondary: #8b5cf6;
+      --accent: #10b981;
+      --ring: rgba(148, 163, 184, 0.2);
+      --gradient-start: rgba(59, 130, 246, 0.15);
+      --gradient-end: rgba(139, 92, 246, 0.1);
     }
-    html,body{ background:var(--bg); }
-    /* Force white text everywhere (requested) */
-    body, .card, .card *, .btn, .form-select, .badge, .text-muted, .muted, .form-label, label, h1,h2,h3,h4,h5,h6,p,ol,li,small,span,div {
-      color: #fff !important;
+
+    body {
+      background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     }
-    .wrap{ max-width:1280px; margin:24px auto; padding:0 12px; }
-    .card{ background:var(--panel); border:1px solid var(--ring); border-radius:14px; }
-    .grid{ display:grid; gap:16px; grid-template-columns: 1fr; }
-    @media (min-width: 1200px){ .grid{ grid-template-columns: 1.25fr .75fr; } }
-    .kpi{ font-weight:800; font-size:clamp(1.15rem, 3.2vw, 1.7rem); }
-    ol{ padding-left:1.15rem; }
-    .badge-soft{ background:rgba(255,255,255,.12); border:1px solid var(--ring); }
-    .card:hover{ box-shadow:0 12px 30px rgba(0,0,0,.28) }
-    /* Make lists tidy on mobile */
-    .two-col { display:grid; gap:12px; grid-template-columns: 1fr; }
-    @media (min-width: 992px){ .two-col{ grid-template-columns: 1fr 1fr; } }
+
+    .dashboard-wrapper {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Header styling */
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--card-bg), rgba(30, 41, 59, 0.95));
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Card styling */
+    .dashboard-card {
+      background: var(--card-bg);
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      height: 100%;
+      backdrop-filter: blur(10px);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-gradient {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      border: none;
+    }
+
+    /* KPI Cards */
+    .kpi-card {
+      border-left: 4px solid var(--primary);
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    }
+
+    .kpi-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .kpi-label {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Chart containers */
+    .chart-container {
+      position: relative;
+      height: 100%;
+      min-height: 200px;
+    }
+
+    /* List styling */
+    .data-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .data-list li {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--ring);
+      transition: background-color 0.2s;
+    }
+
+    .data-list li:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .data-list li:last-child {
+      border-bottom: none;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      color: white;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+
+    /* Badge styling */
+    .metric-badge {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Button styling */
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Grid layout */
+    .dashboard-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    /* Sermon highlight */
+    .sermon-highlight {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+      border-left: 4px solid var(--accent);
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    /* Map styling */
+    .map-container {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--ring);
+    }
+
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--ring);
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(59, 130, 246, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: #60a5fa;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.5);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.7);
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-      <div>
-        <h1 class="h4 m-0">Traffic Dashboard</h1>
-        <small>Overview • Devices • Browsers • Locations • Most Played Sermon</small>
-      </div>
-      <div class="d-flex gap-2 align-items-center">
-        <select id="daysSelect" class="form-select form-select-sm w-auto bg-dark border-light">
-          <option value="7">Last 7d</option>
-          <option value="14">Last 14d</option>
-          <option value="30" selected>Last 30d</option>
-          <option value="90">Last 90d</option>
-        </select>
-        <a class="btn btn-outline-light btn-sm" href="/admin/analytics/visit/" target="_blank">
-          <i class="bi bi-shield-lock"></i> Admin
-        </a>
+  <div class="dashboard-wrapper">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="section-icon">
+              <i class="bi bi-bar-chart-fill"></i>
+            </div>
+            <div>
+              <h1 class="h3 mb-1 fw-bold">Traffic Dashboard</h1>
+              <p class="text-slate-400 mb-0">Real-time analytics & audience insights</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3 mt-3">
+            <span class="metric-badge">
+              <i class="bi bi-eye me-1"></i> <span id="kpiPageviews">—</span> views
+            </span>
+            <span class="metric-badge">
+              <i class="bi bi-people me-1"></i> <span id="kpiVisitors">—</span> visitors
+            </span>
+            <span class="metric-badge">
+              <i class="bi bi-lightning me-1"></i> <span id="kpiAvgMs">—</span> ms avg
+            </span>
+          </div>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <div class="dropdown">
+            <button class="btn btn-glass dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-calendar3 me-2"></i>
+              <span id="txtRange">30</span> days
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li><a class="dropdown-item" href="#" data-days="7">Last 7 days</a></li>
+              <li><a class="dropdown-item" href="#" data-days="14">Last 14 days</a></li>
+              <li><a class="dropdown-item" href="#" data-days="30">Last 30 days</a></li>
+              <li><a class="dropdown-item" href="#" data-days="90">Last 90 days</a></li>
+            </ul>
+          </div>
+          <a class="btn btn-glass" href="/admin/analytics/visit/" target="_blank">
+            <i class="bi bi-gear me-1"></i> Manage
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="grid">
-      <!-- LEFT -->
-      <div>
-        <!-- KPI + Timeseries -->
-        <div class="card p-3 mb-3">
-          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column -->
+      <div class="d-flex flex-column gap-3">
+        <!-- Performance Overview -->
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="bi bi-graph-up"></i>
+            </div>
             <div>
-              <div class="small">Date range: <span id="txtRange">30</span> days</div>
-              <div class="kpi">
-                <span id="kpiPageviews">—</span> pageviews •
-                <span id="kpiVisitors">—</span> visitors
-                <span class="badge rounded-pill badge-soft ms-2"><i class="bi bi-speedometer2"></i> <span id="kpiAvgMs">—</span> ms avg</span>
+              <h2 class="h5 mb-1 fw-bold">Performance Overview</h2>
+              <small class="text-slate-400">Daily traffic patterns and engagement</small>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartTimeseries" height="120"></canvas>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-4">
+              <div class="kpi-card p-3 rounded-3">
+                <div class="kpi-label">Top Page</div>
+                <div class="kpi-value" id="kpiTopPath">—</div>
               </div>
             </div>
-            <div class="text-end">
-              <div class="small">Top page</div>
-              <div id="kpiTopPath" class="text-truncate" style="max-width:320px">—</div>
+            <div class="col-md-4">
+              <div class="kpi-card p-3 rounded-3">
+                <div class="kpi-label">Peak Day</div>
+                <div class="kpi-value" id="kpiPeakDay">—</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kpi-card p-3 rounded-3">
+                <div class="kpi-label">Avg. Session</div>
+                <div class="kpi-value">—<small class="fs-6"> min</small></div>
+              </div>
             </div>
           </div>
-          <canvas id="chartTimeseries" height="120"></canvas>
         </div>
 
-        <!-- Top pages / referrers (responsive two columns) -->
-        <div class="two-col">
-          <div class="card p-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <strong>Top pages</strong><span class="small" id="tpTotal">&nbsp;</span>
-            </div>
-            <ol id="topPages" class="m-0"></ol>
-          </div>
-          <div class="card p-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <strong>Top referrers</strong><span class="small" id="trTotal">&nbsp;</span>
-            </div>
-            <ol id="topRef" class="m-0"></ol>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT -->
-      <div>
-        <!-- Most Played Sermon -->
-        <div class="card p-3 mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>Most Played Sermon</strong><span class="small">event-based</span>
-          </div>
-          <div id="mps" class="d-flex align-items-center justify-content-between">
-            <div>
-              <div id="mpsTitle" class="fw-bold text-truncate" style="max-width: 360px;">—</div>
-              <div class="small" id="mpsSlug">—</div>
-            </div>
-            <div class="display-6 m-0" id="mpsCount">—</div>
-          </div>
-          <hr class="my-3">
-          <div>
-            <strong class="small d-block mb-2">Top 5</strong>
-            <ol id="mpsList" class="m-0"></ol>
-          </div>
-        </div>
-
-        <div class="card p-3 mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>Devices</strong><span class="small">type share</span>
-          </div>
-          <canvas id="chartDevices" height="170"></canvas>
-        </div>
-
-        <div class="card p-3 mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>Operating Systems</strong><span class="small">OS share</span>
-          </div>
-          <canvas id="chartOS" height="170"></canvas>
-        </div>
-
-        <div class="card p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>Browsers</strong><span class="small">top clients</span>
-          </div>
-          <canvas id="chartBrowsers" height="170"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- GEO -->
-    <div class="mt-3">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <strong>Audience by Location</strong>
-          <span class="small">countries & cities (GeoIP derived)</span>
-        </div>
+        <!-- Content & Referral Analysis -->
         <div class="row g-3">
-          <div class="col-lg-8">
-            <canvas id="mapCountries" height="260"></canvas>
+          <div class="col-lg-6">
+            <div class="dashboard-card h-100">
+              <div class="section-header">
+                <div class="section-icon">
+                  <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div>
+                  <h2 class="h5 mb-1 fw-bold">Top Content</h2>
+                  <small class="text-slate-400">Most visited pages</small>
+                </div>
+                <span class="ms-auto badge bg-primary bg-opacity-25" id="tpTotal"></span>
+              </div>
+              <ul class="data-list" id="topPages"></ul>
+            </div>
           </div>
-          <div class="col-lg-4">
-            <div class="card p-3 mb-3"><strong class="d-block mb-2">Top countries</strong><ol id="geoCountries" class="m-0"></ol></div>
-            <div class="card p-3"><strong class="d-block mb-2">Top cities</strong><ol id="geoCities" class="m-0"></ol></div>
+          <div class="col-lg-6">
+            <div class="dashboard-card h-100">
+              <div class="section-header">
+                <div class="section-icon">
+                  <i class="bi bi-link-45deg"></i>
+                </div>
+                <div>
+                  <h2 class="h5 mb-1 fw-bold">Traffic Sources</h2>
+                  <small class="text-slate-400">Where visitors come from</small>
+                </div>
+                <span class="ms-auto badge bg-secondary bg-opacity-25" id="trTotal"></span>
+              </div>
+              <ul class="data-list" id="topRef"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audience Location -->
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="bi bi-globe"></i>
+            </div>
+            <div>
+              <h2 class="h5 mb-1 fw-bold">Global Audience</h2>
+              <small class="text-slate-400">Visitor distribution by location</small>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-lg-8">
+              <div class="map-container">
+                <canvas id="mapCountries" height="260"></canvas>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="dashboard-card">
+                    <h3 class="h6 fw-bold mb-3">Top Countries</h3>
+                    <ul class="data-list" id="geoCountries"></ul>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="dashboard-card">
+                    <h3 class="h6 fw-bold mb-3">Top Cities</h3>
+                    <ul class="data-list" id="geoCities"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="d-flex flex-column gap-3">
+        <!-- Most Played Sermon -->
+        <div class="dashboard-card card-gradient">
+          <div class="section-header">
+            <div class="section-icon bg-success bg-opacity-25">
+              <i class="bi bi-play-circle text-success"></i>
+            </div>
+            <div>
+              <h2 class="h5 mb-1 fw-bold">Most Played Content</h2>
+              <small class="text-slate-300">Audience engagement highlights</small>
+            </div>
+          </div>
+          
+          <div class="sermon-highlight mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div style="flex: 1;">
+                <div class="mb-1">
+                  <span class="badge bg-success bg-opacity-25 text-success mb-2">#1 Ranking</span>
+                </div>
+                <h3 class="h6 fw-bold mb-2" id="mpsTitle">—</h3>
+                <p class="text-slate-300 small mb-0" id="mpsSlug">—</p>
+              </div>
+              <div class="display-5 fw-bold text-success ms-3" id="mpsCount">—</div>
+            </div>
+            <div class="progress mt-3" style="height: 6px; background: rgba(255,255,255,0.1);">
+              <div class="progress-bar bg-success" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <h3 class="h6 fw-bold mb-3">Top 5 Sermons</h3>
+          <ul class="data-list" id="mpsList"></ul>
+        </div>
+
+        <!-- Audience Demographics -->
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="bi bi-phone"></i>
+            </div>
+            <div>
+              <h2 class="h5 mb-1 fw-bold">Device Usage</h2>
+              <small class="text-slate-400">How visitors access content</small>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartDevices" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="bi bi-laptop"></i>
+            </div>
+            <div>
+              <h2 class="h5 mb-1 fw-bold">Platform Distribution</h2>
+              <small class="text-slate-400">Operating systems used</small>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartOS" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="bi bi-browser-chrome"></i>
+            </div>
+            <div>
+              <h2 class="h5 mb-1 fw-bold">Browser Share</h2>
+              <small class="text-slate-400">Preferred web browsers</small>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartBrowsers" height="200"></canvas>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Footer Stats -->
+    <div class="row g-3 mt-4">
+      <div class="col-md-3">
+        <div class="dashboard-card text-center">
+          <div class="kpi-label">Returning Rate</div>
+          <div class="kpi-value">—<small class="fs-6">%</small></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="dashboard-card text-center">
+          <div class="kpi-label">Bounce Rate</div>
+          <div class="kpi-value">—<small class="fs-6">%</small></div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="dashboard-card text-center">
+          <div class="kpi-label">Pages/Session</div>
+          <div class="kpi-value">—</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="dashboard-card text-center">
+          <div class="kpi-label">Engagement</div>
+          <div class="kpi-value">—<small class="fs-6"> min</small></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.3.2/build/index.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const urls = {
       ts: "{% url 'analytics:api_timeseries' %}",
@@ -179,13 +522,10 @@
       tr: document.getElementById('topRef'),
       tpTotal: document.getElementById('tpTotal'),
       trTotal: document.getElementById('trTotal'),
-      daysSelect: document.getElementById('daysSelect'),
-      // Most played sermon
       mpsTitle: document.getElementById('mpsTitle'),
       mpsSlug: document.getElementById('mpsSlug'),
       mpsCount: document.getElementById('mpsCount'),
       mpsList: document.getElementById('mpsList'),
-      // Geo lists
       geoCountries: document.getElementById('geoCountries'),
       geoCities: document.getElementById('geoCities'),
     };
@@ -200,141 +540,292 @@
       return worldFeatures;
     }
 
-    function whiteAxisOptions(){
-      return {
-        ticks: { color:'#fff' },
-        grid: { color:'rgba(255,255,255,0.12)' }
-      }
-    }
-    const whiteLegend = { labels: { color:'#fff' } };
+    const chartTheme = {
+      color: 'rgba(148, 163, 184, 0.8)',
+      font: { family: "'Segoe UI', system-ui, sans-serif" }
+    };
 
     async function loadAll(){
-      const days = els.daysSelect.value;
+      const days = document.querySelector('[data-days]') ? document.querySelector('[data-days]').parentElement.parentElement.querySelector('.btn').textContent.match(/\d+/)[0] : 30;
       els.txtRange.textContent = days;
 
-      const [ts, pages, refs, dev, os, br, geoC, geoCi, sermons] = await Promise.all([
-        fetch(`${urls.ts}?days=${days}`).then(r=>r.json()),
-        fetch(urls.pages).then(r=>r.json()),
-        fetch(urls.refs).then(r=>r.json()),
-        fetch(urls.devices).then(r=>r.json()),
-        fetch(urls.os).then(r=>r.json()),
-        fetch(urls.browsers).then(r=>r.json()),
-        fetch(urls.geoCountries).then(r=>r.json()),
-        fetch(`${urls.geoCities}?days=${days}`).then(r=>r.json()),
-        fetch(`${urls.topSermons}?limit=5`).then(r=>r.json()),
-      ]);
+      try {
+        const [ts, pages, refs, dev, os, br, geoC, geoCi, sermons] = await Promise.all([
+          fetch(`${urls.ts}?days=${days}`).then(r=>r.json()),
+          fetch(urls.pages).then(r=>r.json()),
+          fetch(urls.refs).then(r=>r.json()),
+          fetch(urls.devices).then(r=>r.json()),
+          fetch(urls.os).then(r=>r.json()),
+          fetch(urls.browsers).then(r=>r.json()),
+          fetch(urls.geoCountries).then(r=>r.json()),
+          fetch(`${urls.geoCities}?days=${days}`).then(r=>r.json()),
+          fetch(`${urls.topSermons}?limit=5`).then(r=>r.json()),
+        ]);
 
-      // KPIs
-      const pvSum = ts.pageviews.reduce((a,b)=>a+b,0);
-      const uvSum = ts.visitors.reduce((a,b)=>a+b,0);
-      els.kpiPV.textContent = pvSum.toLocaleString();
-      els.kpiUV.textContent = uvSum.toLocaleString();
-      // rough avg response proxy (if you later expose real metric, replace)
-      const avgMs = Math.round((pvSum / Math.max(ts.labels.length, 1)) * 3);
-      els.kpiAvg.textContent = isFinite(avgMs) ? avgMs.toLocaleString() : "—";
+        // Update KPIs
+        const pvSum = ts.pageviews.reduce((a,b)=>a+b,0);
+        const uvSum = ts.visitors.reduce((a,b)=>a+b,0);
+        els.kpiPV.textContent = pvSum.toLocaleString();
+        els.kpiUV.textContent = uvSum.toLocaleString();
+        const avgMs = Math.round((pvSum / Math.max(ts.labels.length, 1)) * 3);
+        els.kpiAvg.textContent = isFinite(avgMs) ? avgMs.toLocaleString() : "—";
 
-      // Timeseries
-      const ctx = document.getElementById('chartTimeseries');
-      if (tsChart) tsChart.destroy();
-      tsChart = new Chart(ctx, {
-        type: 'line',
-        data: { labels: ts.labels,
-          datasets: [
-            { label: 'Pageviews', data: ts.pageviews, tension:.35, fill:false },
-            { label: 'Visitors', data: ts.visitors, tension:.35, fill:false },
-          ] },
-        options: {
-          responsive: true,
-          plugins: { legend: whiteLegend },
-          scales: { x: whiteAxisOptions(), y: whiteAxisOptions() }
+        // Update top path
+        els.kpiTopPath.textContent = pages.rows[0]?.path?.replace(/^\//, '')?.replace(/\//g, ' › ') || "—";
+
+        // Timeseries Chart
+        const tsCtx = document.getElementById('chartTimeseries');
+        if (tsChart) tsChart.destroy();
+        tsChart = new Chart(tsCtx, {
+          type: 'line',
+          data: {
+            labels: ts.labels,
+            datasets: [
+              {
+                label: 'Pageviews',
+                data: ts.pageviews,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2
+              },
+              {
+                label: 'Visitors',
+                data: ts.visitors,
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: { color: chartTheme.color }
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: chartTheme.color }
+              },
+              y: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: chartTheme.color },
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        // Update lists with better formatting
+        els.tp.innerHTML = (pages.rows || []).slice(0, 8).map((r,i)=>`
+          <li class="d-flex align-items-center">
+            <span class="rank-badge">${i+1}</span>
+            <div class="flex-grow-1">
+              <div class="text-truncate">${r.path}</div>
+            </div>
+            <span class="badge bg-primary bg-opacity-25">${r.count}</span>
+          </li>
+        `).join('');
+        
+        els.tr.innerHTML = (refs.rows || []).slice(0, 8).map((r,i)=>`
+          <li class="d-flex align-items-center">
+            <span class="rank-badge">${i+1}</span>
+            <div class="flex-grow-1">
+              <div class="text-truncate">${r.referer || 'Direct'}</div>
+            </div>
+            <span class="badge bg-secondary bg-opacity-25">${r.count}</span>
+          </li>
+        `).join('');
+
+        els.tpTotal.textContent = (pages.rows || []).reduce((a,b)=>a+b.count,0).toLocaleString();
+        els.trTotal.textContent = (refs.rows || []).reduce((a,b)=>a+b.count,0).toLocaleString();
+
+        // Devices Chart
+        const devCtx = document.getElementById('chartDevices');
+        if (devChart) devChart.destroy();
+        devChart = new Chart(devCtx, {
+          type: 'doughnut',
+          data: {
+            labels: dev.labels,
+            datasets: [{
+              data: dev.values,
+              backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: chartTheme.color, font: { size: 12 } } }
+            }
+          }
+        });
+
+        // OS Chart
+        const osCtx = document.getElementById('chartOS');
+        if (osChart) osChart.destroy();
+        osChart = new Chart(osCtx, {
+          type: 'pie',
+          data: {
+            labels: os.labels,
+            datasets: [{
+              data: os.values,
+              backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: chartTheme.color, font: { size: 12 } } }
+            }
+          }
+        });
+
+        // Browsers Chart
+        const brCtx = document.getElementById('chartBrowsers');
+        if (brChart) brChart.destroy();
+        brChart = new Chart(brCtx, {
+          type: 'bar',
+          data: {
+            labels: br.labels,
+            datasets: [{
+              label: 'Users',
+              data: br.values,
+              backgroundColor: '#3b82f6',
+              borderRadius: 6,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: chartTheme.color, font: { size: 11 } }
+              },
+              y: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: chartTheme.color },
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        // Most Played Sermons
+        const rows = sermons.rows || [];
+        if (rows.length){
+          els.mpsTitle.textContent = rows[0].title || rows[0].slug || '(Untitled)';
+          els.mpsSlug.textContent = rows[0].slug || '';
+          els.mpsCount.textContent = rows[0].count.toLocaleString();
+          
+          els.mpsList.innerHTML = rows.slice(0, 5).map((r,i)=>`
+            <li class="d-flex align-items-center">
+              <span class="rank-badge">${i+1}</span>
+              <div class="flex-grow-1">
+                <div class="text-truncate">${r.title || r.slug || 'Untitled'}</div>
+              </div>
+              <span class="badge bg-success bg-opacity-25">${r.count}</span>
+            </li>
+          `).join('');
         }
-      });
 
-      // Top pages / referrers
-      els.tp.innerHTML = pages.rows.map((r,i)=>`<li class="d-flex justify-content-between"><span class="text-truncate" style="max-width:78%">${i+1}. ${r.path}</span><span>${r.count}</span></li>`).join('');
-      els.tr.innerHTML = refs.rows.map((r,i)=>`<li class="d-flex justify-content-between"><span class="text-truncate" style="max-width:78%">${i+1}. ${r.referer}</span><span>${r.count}</span></li>`).join('');
-      els.tpTotal.textContent = pages.rows.reduce((a,b)=>a+b.count,0).toLocaleString();
-      els.trTotal.textContent = refs.rows.reduce((a,b)=>a+b.count,0).toLocaleString();
-      els.kpiTopPath.textContent = pages.rows[0]?.path || "—";
+        // Geo Lists
+        els.geoCountries.innerHTML = (geoC.rows || []).slice(0, 6).map((r,i)=>`
+          <li class="d-flex align-items-center">
+            <span class="rank-badge">${i+1}</span>
+            <div class="flex-grow-1">
+              <div>${r.country_name || r.country}</div>
+            </div>
+            <span class="badge bg-primary bg-opacity-25">${r.count}</span>
+          </li>
+        `).join('');
+        
+        els.geoCities.innerHTML = (geoCi.rows || []).slice(0, 6).map((r,i)=>`
+          <li class="d-flex align-items-center">
+            <span class="rank-badge">${i+1}</span>
+            <div class="flex-grow-1">
+              <div>${r.city}</div>
+              <small class="text-slate-400">${r.country}</small>
+            </div>
+            <span class="badge bg-primary bg-opacity-25">${r.count}</span>
+          </li>
+        `).join('');
 
-      // Devices
-      const dctx = document.getElementById('chartDevices');
-      if (devChart) devChart.destroy();
-      devChart = new Chart(dctx, {
-        type: 'doughnut',
-        data: { labels: dev.labels, datasets: [{ data: dev.values }] },
-        options: { plugins: { legend: whiteLegend } }
-      });
-
-      // OS
-      const octx = document.getElementById('chartOS');
-      if (osChart) osChart.destroy();
-      osChart = new Chart(octx, {
-        type: 'doughnut',
-        data: { labels: os.labels, datasets: [{ data: os.values }] },
-        options: { plugins: { legend: whiteLegend } }
-      });
-
-      // Browsers
-      const bctx = document.getElementById('chartBrowsers');
-      if (brChart) brChart.destroy();
-      brChart = new Chart(bctx, {
-        type: 'bar',
-        data: { labels: br.labels, datasets: [{ label: 'Users', data: br.values }] },
-        options: {
-          responsive: true,
-          plugins: { legend: { display:false } },
-          scales: { x: whiteAxisOptions(), y: { ...whiteAxisOptions(), beginAtZero:true } }
-        }
-      });
-
-      // Most played sermons
-      const rows = sermons.rows || [];
-      if (rows.length){
-        els.mpsTitle.textContent = rows[0].title || '(untitled)';
-        els.mpsSlug.textContent  = rows[0].slug || '';
-        els.mpsCount.textContent = rows[0].count.toLocaleString();
-        els.mpsList.innerHTML = rows.map((r,i)=>`<li class="d-flex justify-content-between">
-          <span class="text-truncate" style="max-width:78%">${i+1}. ${r.title || r.slug}</span>
-          <span>${r.count}</span>
-        </li>`).join('');
-      } else {
-        els.mpsTitle.textContent = 'No plays yet';
-        els.mpsSlug.textContent = '';
-        els.mpsCount.textContent = '0';
-        els.mpsList.innerHTML = '';
-      }
-
-      // GEO lists
-      els.geoCountries.innerHTML = (geoC.rows || []).map((r,i)=>`<li class="d-flex justify-content-between"><span>${i+1}. ${r.country_name || r.country}</span><span>${r.count}</span></li>`).join('');
-      els.geoCities.innerHTML = (geoCi.rows || []).map((r,i)=>`<li class="d-flex justify-content-between"><span>${i+1}. ${r.city} <span class="text-white-50">(${r.country})</span></span><span>${r.count}</span></li>`).join('');
-
-      // Map (choropleth)
-      try{
+        // Map
         await loadWorld();
         const dataByISO2 = {};
         (geoC.rows || []).forEach(r => dataByISO2[r.country] = r.count);
         const features = worldFeatures;
-        const mctx = document.getElementById('mapCountries');
+        const mapCtx = document.getElementById('mapCountries');
         if (mapChart) mapChart.destroy();
-        mapChart = new Chart(mctx, {
+        mapChart = new Chart(mapCtx, {
           type: 'choropleth',
-          data: { labels: features.map(f => f.properties.name),
-            datasets: [{ label:'Visitors by country', data: features.map(f => ({ feature:f, value:(dataByISO2[f.properties.iso_a2]||0) })) }] },
+          data: {
+            labels: features.map(f => f.properties.name),
+            datasets: [{
+              label: 'Visitors',
+              data: features.map(f => ({
+                feature: f,
+                value: dataByISO2[f.properties.iso_a2] || 0
+              }))
+            }]
+          },
           options: {
-            showOutline: true, showGraticule: true,
-            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false,
+            showOutline: true,
+            showGraticule: false,
+            plugins: {
+              legend: { display: false }
+            },
             scales: {
-              projection: { axis: 'x', projection: 'equalEarth' },
-              color: { axis:'y', interpolate:'blues' }
+              projection: {
+                axis: 'x',
+                projection: 'equalEarth'
+              },
+              color: {
+                axis: 'y',
+                interpolate: 'Blues',
+                legend: { display: false }
+              }
             }
           }
         });
-      }catch(e){}
+
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
     }
 
-    document.getElementById('daysSelect').addEventListener('change', loadAll);
-    loadAll();
+    // Event listeners
+    document.querySelectorAll('[data-days]').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const days = item.getAttribute('data-days');
+        els.txtRange.textContent = days;
+        item.parentElement.parentElement.querySelector('.btn').innerHTML = 
+          `<i class="bi bi-calendar3 me-2"></i>${days} days`;
+        loadAll();
+      });
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadAll);
   </script>
 </body>
 </html>

@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'accounts.User'
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -38,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://layersoftruth.org",
     "https://live.layersoftruth.org",
     "https://stream.layersoftruth.org",
+    "https://embed.radio.co"
 ]
 
 # Application definition
@@ -49,9 +50,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
     "django.contrib.humanize", 
     "stream.apps.StreamConfig",
-    "user.apps.UserConfig",
+    "accounts.apps.AccountsConfig",
     "analytics.apps.AnalyticsConfig",
 
 ]

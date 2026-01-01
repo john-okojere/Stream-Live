@@ -1,18 +1,20 @@
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Sermon
-from .forms import SermonForm
-from django.views.generic import ListView, DetailView
+from datetime import timedelta
 from collections import Counter
 
-from django.db.models import Q, Count
-from django.http import JsonResponse, Http404, HttpResponse
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.dateformat import format as datefmt
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView, ListView
 
+from analytics.models import Event, Visit
+
+from .forms import SermonForm
 from .models import Sermon
 
 
@@ -26,12 +28,48 @@ def upload_sermon(request):
     if request.method == "POST":
         form = SermonForm(request.POST, request.FILES)
         if form.is_valid():
-            sermon = form.save()
+            sermon = form.save(commit=False)
+            sermon.uploaded_by = request.user
+            sermon.save()
             messages.success(request, "Sermon uploaded.")
             return redirect(sermon.get_absolute_url())
     else:
         form = SermonForm()
     return render(request, "stream/upload.html", {"form": form})
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def staff_dashboard(request):
+    now = timezone.now()
+    since = now - timedelta(days=7)
+
+    sermons_total = Sermon.objects.count()
+    sermons_week = Sermon.objects.filter(date__gte=since.date()).count()
+    plays_week = Event.objects.filter(event="play", ts__gte=since).count()
+    visits_week = Visit.objects.filter(ts__gte=since).count()
+
+    top_sermons = (
+        Event.objects.filter(event="play")
+        .values("slug", "title")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
+    )
+    recent_sermons = Sermon.objects.order_by("-date", "-id")[:6]
+    recent_events = Event.objects.filter(event="play").order_by("-ts")[:8]
+    recent_visits = Visit.objects.order_by("-ts")[:8]
+
+    context = {
+        "sermons_total": sermons_total,
+        "sermons_week": sermons_week,
+        "plays_week": plays_week,
+        "visits_week": visits_week,
+        "top_sermons": top_sermons,
+        "recent_sermons": recent_sermons,
+        "recent_events": recent_events,
+        "recent_visits": recent_visits,
+    }
+    return render(request, "stream/staff_dashboard.html", context)
 
 
 

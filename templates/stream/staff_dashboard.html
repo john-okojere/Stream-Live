@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container section-gap" id="pageRoot">
+  <div class="page-hero mb-4">
+    <span class="eyebrow"><i class="bi bi-speedometer2"></i> Control Room</span>
+    <h1 class="h3 mb-1">Content & Activity</h1>
+    <p class="lede">Manage posts and keep an eye on plays and traffic.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'stream:upload_sermon' %}"><i class="bi bi-upload"></i> New post</a>
+      <a class="btn btn-outline-light" href="{% url 'admin:index' %}" target="_blank"><i class="bi bi-shield-lock"></i> Admin site</a>
+      <a class="btn btn-outline-light" href="{% url 'analytics:dashboard' %}" target="_blank"><i class="bi bi-graph-up"></i> Analytics</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100">
+        <div class="text-muted small">Total posts</div>
+        <div class="display-6 fw-bold">{{ sermons_total }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100">
+        <div class="text-muted small">New this week</div>
+        <div class="display-6 fw-bold">{{ sermons_week }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100">
+        <div class="text-muted small">Plays (7d)</div>
+        <div class="display-6 fw-bold">{{ plays_week }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100">
+        <div class="text-muted small">Visits (7d)</div>
+        <div class="display-6 fw-bold">{{ visits_week }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-3">
+    <div class="col-lg-7">
+      <div class="glass-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Latest posts</div>
+          <a class="btn btn-outline-light btn-sm" href="{% url 'stream:upload_sermon' %}">
+            <i class="bi bi-plus-lg"></i> Add
+          </a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle text-white-50 mb-0">
+            <thead>
+              <tr>
+                <th class="text-white">Title</th>
+                <th class="text-white">Speaker</th>
+                <th class="text-white">Uploader</th>
+                <th class="text-white">Date</th>
+                <th class="text-end text-white">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in recent_sermons %}
+              <tr>
+                <td class="text-white">{{ s.title }}</td>
+                <td>{{ s.speaker|default:"—" }}</td>
+                <td>{{ s.uploaded_by|default:"—" }}</td>
+                <td>{{ s.date|date:"M j, Y" }}</td>
+                <td class="text-end">
+                  <a class="btn btn-outline-light btn-sm" href="{% url 'stream:past_detail' s.slug %}" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>
+                  <a class="btn btn-outline-light btn-sm" href="{% url 'admin:stream_sermon_change' s.id %}" target="_blank"><i class="bi bi-pencil-square"></i></a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-muted">No posts yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="glass-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Top played</div>
+          <a class="btn btn-outline-light btn-sm" href="{% url 'analytics:dashboard' %}" target="_blank"><i class="bi bi-graph-up"></i> Full view</a>
+        </div>
+        <ol class="m-0">
+          {% for row in top_sermons %}
+          <li class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-truncate" style="max-width:70%">{{ row.title|default:row.slug|default:"(untitled)" }}</span>
+            <span class="badge text-bg-light text-dark">{{ row.count }}</span>
+          </li>
+          {% empty %}
+          <li class="text-muted">No plays yet.</li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-3">
+    <div class="col-lg-6">
+      <div class="glass-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Recent plays</div>
+          <a class="btn btn-outline-light btn-sm" href="{% url 'admin:analytics_event_changelist' %}" target="_blank"><i class="bi bi-shield-lock"></i> Events</a>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for e in recent_events %}
+          <li class="list-group-item bg-transparent border-light-subtle d-flex justify-content-between align-items-center text-white-50">
+            <div>
+              <div class="text-white">{{ e.title|default:e.slug|default:"(untitled)" }}</div>
+              <div class="small">{{ e.ts|date:"M j, H:i" }} • {{ e.user|default:"Anon" }}</div>
+            </div>
+            <span class="badge text-bg-light text-dark">{{ e.event }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item bg-transparent border-light-subtle text-muted">No events yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="glass-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Recent visits</div>
+          <a class="btn btn-outline-light btn-sm" href="{% url 'admin:analytics_visit_changelist' %}" target="_blank"><i class="bi bi-shield-lock"></i> Visits</a>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for v in recent_visits %}
+          <li class="list-group-item bg-transparent border-light-subtle d-flex justify-content-between align-items-center text-white-50">
+            <div class="me-2">
+              <div class="text-white text-truncate" style="max-width: 360px;">{{ v.path }}</div>
+              <div class="small">{{ v.ts|date:"M j, H:i" }} • {{ v.visitor_id|default:"Anon" }}</div>
+            </div>
+            <span class="badge text-bg-light text-dark">{{ v.status_code|default:"—" }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item bg-transparent border-light-subtle text-muted">No visits recorded.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

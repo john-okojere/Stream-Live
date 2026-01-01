@@ -1,1015 +1,1667 @@
 {% load static nav %}
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-  <title>{% block title %}Layers of Truth{% endblock %}</title>
-  {% block meta %}{% endblock meta %}
+  <title>{% block title %}Layers of Truth | Streaming Ministry{% endblock %}</title>
+  {% block meta %}
+  <meta name="description" content="Live streaming ministry. Listen to sermons, worship, and biblical teachings from Layers of Truth." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Layers of Truth | Streaming Ministry" />
+  <meta property="og:description" content="Live streaming ministry. Listen to sermons, worship, and biblical teachings from Layers of Truth." />
+  <meta property="og:image" content="{% static 'assets/lot-social.jpg' %}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  {% endblock meta %}
 
   <link rel="icon" href="{% static 'img/lot-logo-black.png' %}" type="image/png" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
   <meta name="theme-color" content="#0b1222">
   <meta name="color-scheme" content="dark light">
 
-  <link rel="stylesheet" href="{% static 'assets/lot-player.css' %}">
-
   <style>
-    :root{
-      --bg:#0b1222;
-      --panel:rgba(255,255,255,.04);
-      --panel-2:rgba(255,255,255,.06);
-      --ring:#1f2b43;
-      --ink:#e6edf3;
-      --muted:#a8b3c7;
-      --accent:#7b8cff;       /* unified accent */
-      --accent-2:#d248ff;
-      --nav-h:64px;
-      --player-h:92px;        /* little taller for more controls */
-      --radius:14px;
-    }
-    html{ scroll-behavior:smooth }
-    body{
-      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      padding-top:var(--nav-h);
-      padding-bottom:var(--player-h);
-      background:
-        radial-gradient(1000px 700px at 8% -12%, rgba(123,140,255,.16), transparent 40%),
-        radial-gradient(1000px 700px at 110% -10%, rgba(210,72,255,.10), transparent 42%),
-        var(--bg);
-      color: var(--ink);
-    }
-    .lot-accent-bar{ position:fixed; inset:0 0 auto 0; height:2px; z-index:1100;
-      background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent));
-      opacity:.7; }
-
-    /* Navbar */
-    .lot-nav{
-      position:fixed; inset:0 0 auto 0; height:var(--nav-h); z-index:1020;
-      background:linear-gradient(135deg, rgba(13,27,42,.85), rgba(26,46,79,.85));
-      backdrop-filter:saturate(160%) blur(10px);
-      border-bottom:1px solid var(--ring);
-    }
-    .lot-brand{display:flex; align-items:center; gap:.6rem; color:#fff; font-weight:800; letter-spacing:.3px; text-decoration:none;}
-    .lot-brand-logo{height:40px}
-    .navbar-nav .nav-link{ color:#e6edf3 !important; font-weight:600; position:relative; }
-    .navbar-nav .nav-link::after{
-      content:""; position:absolute; left:0; right:0; bottom:-6px; height:2px;
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));
-      transform:scaleX(0); transform-origin:left; transition:transform .25s ease;
-    }
-    .navbar-nav .nav-link:hover::after, .navbar-nav .nav-link.active::after{ transform:scaleX(1) }
-
-    .badge-live{
-      display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:999px;
-      font-weight:800; letter-spacing:.4px; font-size:.8rem; color:#fff;
-      background:linear-gradient(90deg, var(--accent), var(--accent-2));
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-    .pulse-dot{ width:.5rem; height:.5rem; border-radius:50%; background:#ff6a95;
-      box-shadow:0 0 0 0 rgba(255,106,149,.6); animation:lotPulse 1.6s infinite }
-    @keyframes lotPulse{0%{box-shadow:0 0 0 0 rgba(255,106,149,.6)}70%{box-shadow:0 0 0 10px rgba(255,106,149,0)}100%{box-shadow:0 0 0 0 rgba(255,106,149,0)}}
-
-    .offcanvas.lot-offcanvas{
-      background:linear-gradient(135deg, rgba(13,27,42,.98), rgba(26,46,79,.98));
-      color:#e6edf3;
-      border-right:1px solid var(--ring);
-    }
-    .lot-offcanvas .nav-link{ color:#e6edf3; font-weight:700; }
-    .lot-offcanvas .nav-link.active{ text-decoration:underline; text-underline-offset:4px; }
-
-    .lot-messages{ position: fixed; top: calc(12px + var(--nav-h)); left: 50%; transform: translateX(-50%);
-      width: min(100%, 720px); z-index:1080; padding:0 12px; }
-
-    .lot-footer{
-      border-top:1px solid var(--ring);
-      background:linear-gradient(180deg, rgba(16,22,39,.9), rgba(8,12,24,.9));
-      color:var(--muted);
+    :root {
+      /* Color System */
+      --bg: #0b1222;
+      --bg-elevated: #111a30;
+      --bg-surface: #1a243f;
+      --bg-card: #222d4a;
+      --bg-overlay: rgba(11, 18, 34, 0.95);
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-accent: #7b8cff;
+      
+      --accent-primary: #7b8cff;
+      --accent-secondary: #d248ff;
+      --accent-gradient: linear-gradient(135deg, #7b8cff, #d248ff);
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --accent-live: #ff6a95;
+      
+      --border-light: rgba(255, 255, 255, 0.12);
+      --border-medium: rgba(255, 255, 255, 0.16);
+      --border-heavy: rgba(255, 255, 255, 0.2);
+      
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      --space-3xl: 4rem;
+      
+      /* Border Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-2xl: 28px;
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.35);
+      --shadow-2xl: 0 24px 64px rgba(0, 0, 0, 0.4);
+      
+      /* Transitions */
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Layout */
+      --nav-height: 72px;
+      --player-height: 88px;
+      --sidebar-width: 320px;
+      --container-max: 1440px;
     }
 
-    main{ min-height:78vh; }
-    .navbar{ position: fixed !important; }
-
-    /* Queue drawer polish */
-    #queueDrawer .offcanvas-header{ background:rgba(255,255,255,.03); }
-    #queueList .list-group-item{
-      background:transparent; color:#e6edf3; border-color:rgba(255,255,255,.06);
-    }
-    #queueList .list-group-item.active{
-      background:rgba(123,140,255,.18);
-      border-left:2px solid var(--accent);
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    /* Player seek accent */
-    #lot-seek{ accent-color: var(--accent); }
-
-    /* Toggle buttons in player */
-    .btn-toggle{ border-color: rgba(255,255,255,.25); }
-    .btn-toggle.active, .btn-toggle[aria-pressed="true"]{
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));
-      border-color: transparent;
-      color:#fff;
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: calc(var(--nav-height) + var(--space-md));
     }
 
-    /* Equalizer animation next to the title */
-    .eq{ display:flex; gap:2px; width:18px; height:14px; align-items:flex-end; opacity:.5; }
-    .eq span{ width:3px; background:var(--accent); border-radius:1px; height:20%;
-      transform-origin:bottom; animation:eq 1s linear infinite; animation-play-state:paused; }
-    .eq span:nth-child(1){ animation-duration:.9s }
-    .eq span:nth-child(2){ animation-duration:1.1s }
-    .eq span:nth-child(3){ animation-duration:.95s }
-    .eq span:nth-child(4){ animation-duration:1.05s }
-    .eq span:nth-child(5){ animation-duration:1.2s }
-    @keyframes eq{ 0%{transform:scaleY(.3)} 50%{transform:scaleY(1)} 100%{transform:scaleY(.3)} }
-    #lot-player.is-playing .eq span{ animation-play-state:running; opacity:.9; }
-    /* Live drawer glass look */
-    #liveDrawer {
-      backdrop-filter: saturate(160%) blur(10px);
-      -webkit-backdrop-filter: saturate(160%) blur(10px);
-      border-top: 1px solid rgba(255,255,255,.08);
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: 
+        radial-gradient(1000px 800px at 10% -10%, rgba(123, 140, 255, 0.15), transparent 40%),
+        radial-gradient(900px 700px at 95% 20%, rgba(210, 72, 255, 0.12), transparent 35%),
+        linear-gradient(180deg, var(--bg) 0%, #090f1d 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-top: var(--nav-height);
+      padding-bottom: var(--player-height);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Make the embedded player fill nicely */
-    #livePlayerHost iframe {
-      width: 100% !important;
-      height: 340px !important;          /* adjust if you prefer */
-      border: 0;
-      border-radius: 12px;
-      box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    /* Utility Classes */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
     }
 
-    /* Dark container for the widget if it loads slowly */
-    #livePlayerHost {
-      min-height: 180px;
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
     }
-    /* Offcanvas mobile hub polish */
-.oc-card{
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
-}
-#ocQuickList .list-group-item{
-  background: transparent;
-  color: #e6edf3;
-  border-color: rgba(255,255,255,.08);
-}
-#ocQuickList .list-group-item .thumb{
-  width:44px; height:44px; object-fit:cover; border-radius:10px;
-  border:1px solid rgba(255,255,255,.12); background:#0b1222;
-}
-.oc-tag{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.18);
-  color:#dfe3ff; border-radius:999px; padding:.25rem .6rem;
-  font-size:.83rem;
-}
-.store-badge{
-  width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
-  color:#fff; font-size:1.1rem;
-}
 
-/* Simple skeleton shimmer */
-.oc-skel{
-  height:44px; border-radius:10px;
-  background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.18), rgba(255,255,255,.06));
-  background-size:280% 100%; animation: ocSh 1.2s infinite linear;
-}
-@keyframes ocSh { 0%{background-position:200% 0} 100%{background-position:-80% 0} }
-/* Force white text inside the phone offcanvas */
-#lotOffcanvas, #lotOffcanvas * { color: #fff !important; }
-#lotOffcanvas .text-muted { color: rgba(255,255,255,.78) !important; }
-#lotOffcanvas .nav-link { color: #fff !important; }
-#lotOffcanvas .btn-outline-light { color:#fff !important; border-color: rgba(255,255,255,.45) !important; }
-#lotOffcanvas .btn-outline-light:hover { background: rgba(255,255,255,.10) !important; }
+    .gradient-text {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-#lotOffcanvas .lot-search{
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.28);
-  color:#fff;
-}
-#lotOffcanvas .lot-search::placeholder{ color: rgba(255,255,255,.75); }
+    .gradient-border {
+      position: relative;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+    }
 
-#ocQuickList .list-group-item{
-  background:transparent; border-color: rgba(255,255,255,.12);
-}
-#ocQuickList .thumb{
-  width:44px; height:44px; object-fit:cover; border-radius:10px;
-  border:1px solid rgba(255,255,255,.18); background:#0b1222;
-}
-.oc-card{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 14px;
-}
-.oc-tag{
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.22);
-  color:#fff; border-radius:999px; padding:.25rem .6rem; font-size:.83rem;
-}
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: var(--accent-gradient);
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0.3;
+    }
 
-/* simple skeleton shimmer */
-.oc-skel{ height:44px; border-radius:10px;
-  background:linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.18), rgba(255,255,255,.08));
-  background-size:280% 100%; animation:ocSh 1.2s linear infinite;
-}
-@keyframes ocSh{ 0%{background-position:200% 0} 100%{background-position:-80% 0} }
+    .hover-lift {
+      transition: transform var(--transition-base);
+    }
 
-/* === Shared shell elements (heroes, filters, chips) =================== */
-.page-hero{
-  position:relative; overflow:hidden; isolation:isolate;
-  border:1px solid var(--ring); border-radius:18px;
-  padding: clamp(1.4rem, 3vw, 2.2rem);
-  background:
-    radial-gradient(120% 120% at -10% -20%, rgba(123,140,255,.18), transparent 50%),
-    radial-gradient(90% 90% at 110% 0%, rgba(210,72,255,.14), transparent 52%),
-    linear-gradient(135deg, rgba(15,22,40,.9), rgba(12,18,32,.9));
-  box-shadow: 0 18px 42px rgba(0,0,0,.38);
-}
-.page-hero .eyebrow{
-  display:inline-flex; align-items:center; gap:.45rem;
-  padding:.35rem .75rem; border-radius:999px;
-  font-weight:700; letter-spacing:.35px; text-transform:uppercase;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.14);
-  color: var(--muted);
-}
-.page-hero h1{ margin: .65rem 0 .35rem 0; letter-spacing:.4px; }
-.page-hero .lede{ max-width: 70ch; color: var(--muted); }
-.page-hero .hero-actions{ display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1rem; }
+    .hover-lift:hover {
+      transform: translateY(-4px);
+    }
 
-.filter-rail{
-  display:flex; flex-wrap:wrap; gap:.75rem;
-  padding: .9rem;
-  border-radius: 16px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-}
-.filter-rail .pill-input{
-  position: relative; flex: 1 1 260px;
-}
-.pill-input input, .pill-input select{
-  width:100%; height:100%;
-  padding:.65rem .9rem .65rem 2.2rem;
-  border-radius:12px; border:1px solid var(--ring);
-  background: rgba(8,12,22,.85); color: var(--ink);
-}
-.pill-input .bi{ position:absolute; left:.8rem; top:50%; transform:translateY(-50%); color:var(--muted); }
-.filter-rail .btn{ border-radius:12px; }
+    .hover-glow:hover {
+      box-shadow: 0 0 20px rgba(123, 140, 255, 0.3);
+    }
 
-.chip{
-  display:inline-flex; align-items:center; gap:.45rem;
-  padding:.35rem .7rem; border-radius:999px;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  color: var(--ink); font-weight:600; font-size:.9rem;
-}
-.chip .bi{ opacity:.8; }
-.chip.danger{ border-color: rgba(255,122,122,.4); color:#ffdede; }
-.stat-pill{
-  display:inline-flex; align-items:center; gap:.4rem;
-  padding:.5rem .75rem; border-radius:12px;
-  background: rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  color:var(--muted); font-weight:700;
-}
+    .pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
 
-.glass-card{
-  background: rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  box-shadow: 0 14px 32px rgba(0,0,0,.32);
-}
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
 
-.micro-badge{
-  display:inline-flex; align-items:center; gap:.35rem;
-  padding:.28rem .5rem; border-radius:10px; font-size:.83rem; font-weight:700;
-  background: rgba(255,255,255,.08); color:#fff;
-  border:1px solid rgba(255,255,255,.16);
-}
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
 
-.section-gap{ margin-top: clamp(1.5rem, 4vw, 2.75rem); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-/* Live access pill (global) */
-.live-fab{
-  position:fixed; right:16px; bottom: calc(var(--player-h) + 16px);
-  z-index:1045;
-  display:flex; align-items:center; justify-content:space-between; gap:1rem;
-  padding:.7rem .85rem;
-  width:min(420px, calc(100% - 24px));
-  background: rgba(11,18,34,.92);
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:16px;
-  backdrop-filter: saturate(150%) blur(10px);
-  box-shadow:0 18px 38px rgba(0,0,0,.36);
-}
-.live-fab .fab-dot{
-  width:.75rem; height:.75rem; border-radius:50%; background:#ff6a95;
-  box-shadow:0 0 0 0 rgba(255,106,149,.6); animation:lotPulse 1.6s infinite;
-}
-.live-fab.is-offline .fab-dot{ background:#6c757d; box-shadow:none; animation:none; }
-.live-fab .meta{ line-height:1.2; }
-.live-fab .meta .label{ text-transform:uppercase; letter-spacing:.35px; font-weight:800; font-size:.8rem; color:#dfe3ff; }
-.live-fab .meta .status{ color: var(--muted); font-size:.9rem; }
-.live-fab .btn{ border-radius:12px; }
-@media (max-width: 575.98px){
-  .live-fab{ left:12px; right:12px; width:auto; }
-}
+    .slide-in-left {
+      animation: slideInLeft 0.5s ease-out;
+    }
 
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Top Gradient Bar */
+    .lot-gradient-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-gradient);
+      background-size: 200% 200%;
+      animation: gradientFlow 8s ease infinite;
+      z-index: 1110;
+      box-shadow: 0 2px 16px rgba(123, 140, 255, 0.4);
+    }
+
+    @keyframes gradientFlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Modern Navigation */
+    .lot-navbar {
+      position: fixed;
+      top: 4px;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      background: rgba(19, 29, 51, 0.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border-light);
+      z-index: 1100;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      color: white;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: -0.025em;
+    }
+
+    .nav-logo {
+      height: 44px;
+      width: auto;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    }
+
+    /* Live Status Badge */
+    .live-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--accent-gradient);
+      border-radius: var(--radius-full);
+      color: white;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      box-shadow: 0 4px 20px rgba(123, 140, 255, 0.3);
+    }
+
+    .live-status-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(123, 140, 255, 0.4);
+    }
+
+    .live-status-badge::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+      transform: translateX(-100%);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .live-pulse {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff6a95;
+      box-shadow: 0 0 0 0 rgba(255, 106, 149, 0.7);
+      animation: livePulse 2s infinite;
+    }
+
+    @keyframes livePulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 106, 149, 0.7);
+        transform: scale(1);
+      }
+      70% {
+        box-shadow: 0 0 0 12px rgba(255, 106, 149, 0);
+        transform: scale(1.1);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 106, 149, 0);
+        transform: scale(1);
+      }
+    }
+
+    /* Navigation Links */
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-base);
+      position: relative;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .nav-link.active {
+      background: rgba(123, 140, 255, 0.15);
+      color: var(--text-primary);
+    }
+
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -4px;
+      height: 2px;
+      background: var(--accent-gradient);
+      border-radius: var(--radius-full);
+    }
+
+    /* Live Floating Action Button */
+    .live-fab {
+      position: fixed;
+      right: var(--space-xl);
+      bottom: calc(var(--player-height) + var(--space-xl));
+      z-index: 1050;
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-xl);
+      transition: all var(--transition-base);
+      max-width: 400px;
+      width: calc(100% - var(--space-xl) * 2);
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .live-fab:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .live-fab-content {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .live-fab-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .live-fab-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .live-fab-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Player */
+    .lot-player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--player-height);
+      background: rgba(19, 29, 51, 0.98);
+      backdrop-filter: saturate(180%) blur(30px);
+      border-top: 1px solid var(--border-light);
+      z-index: 1000;
+      box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .player-container {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .player-cover {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      flex-shrink: 0;
+    }
+
+    .player-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .player-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-artist {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+    }
+
+    .player-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-medium);
+      transform: translateY(-1px);
+    }
+
+    .player-btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+      width: 44px;
+      height: 44px;
+    }
+
+    .player-btn-primary:hover {
+      background: var(--accent-gradient);
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(123, 140, 255, 0.4);
+    }
+
+    .player-seek {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: var(--border-light);
+      overflow: hidden;
+    }
+
+    .player-seek-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      width: 0%;
+      transition: width 100ms linear;
+    }
+
+    /* Live Drawer */
+    .live-drawer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-medium);
+      box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
+
+    }
+
+    .live-player-embed {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-medium);
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 240px;
+    }
+
+    .live-player-embed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .live-info-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+
+    .live-info-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-md);
+    }
+
+    .live-info-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .live-info-item:last-child {
+      border-bottom: none;
+    }
+
+    .live-info-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      min-width: 80px;
+    }
+
+    .live-info-value {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      flex: 1;
+    }
+
+    /* Queue Drawer */
+    .queue-drawer {
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-medium);
+      box-shadow: -20px 0 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .queue-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-medium);
+      transform: translateX(4px);
+    }
+
+    .queue-item.active {
+      background: rgba(123, 140, 255, 0.1);
+      border-color: var(--accent-primary);
+    }
+
+    .queue-item-cover {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      flex-shrink: 0;
+    }
+
+    .queue-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .queue-item-title {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-item-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Mobile Offcanvas */
+    .mobile-offcanvas {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-medium);
+      box-shadow: 20px 0 60px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Messages */
+    .lot-messages {
+      position: fixed;
+      top: calc(var(--nav-height) + var(--space-md));
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 600px);
+      z-index: 1090;
+      padding: 0 var(--space-md);
+    }
+
+    .alert {
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-lg);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    /* Footer */
+    .lot-footer {
+      background: rgba(9, 15, 29, 0.95);
+      border-top: 1px solid var(--border-light);
+      margin-top: var(--space-3xl);
+      padding: var(--space-2xl) 0;
+    }
+
+    .footer-logo {
+      height: 40px;
+      width: auto;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .footer-links {
+      display: flex;
+      gap: var(--space-lg);
+      justify-content: center;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .footer-link:hover {
+      color: var(--text-primary);
+    }
+
+    /* Radio.co Integration */
+    .radio-status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-xs) var(--space-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .radio-status-indicator.online {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .radio-status-indicator.offline {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .radio-album-art {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      :root {
+        --nav-height: 64px;
+        --player-height: 80px;
+        --space-xl: 1rem;
+      }
+
+      .live-fab {
+        right: var(--space-md);
+        left: var(--space-md);
+        width: auto;
+        bottom: calc(var(--player-height) + var(--space-lg));
+      }
+
+      .nav-brand span {
+        display: none;
+      }
+
+      .player-container {
+        gap: var(--space-md);
+      }
+
+      .player-cover {
+        width: 48px;
+        height: 48px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .live-fab-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+      }
+
+      .live-fab-text {
+        width: 100%;
+      }
+
+      .live-fab-subtitle {
+        font-size: 0.8rem;
+      }
+
+      .player-controls {
+        position: absolute;
+        bottom: var(--space-sm);
+        left: 0;
+        right: 0;
+        justify-content: center;
+        background: rgba(19, 29, 51, 0.95);
+        backdrop-filter: blur(20px);
+        padding: var(--space-sm);
+      }
+
+      .player-info {
+        text-align: center;
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .live-fab {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .live-fab-content {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .live-fab-text {
+        flex: 1;
+      }
+
+      .player-btn {
+        width: 32px;
+        height: 32px;
+      }
+
+      .player-btn-primary {
+        width: 40px;
+        height: 40px;
+      }
+
+      .live-player-embed {
+        min-height: 330px;
+        aspect-ratio: 16 / 9;
+      }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-full);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-full);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Selection */
+    ::selection {
+      background: rgba(123, 140, 255, 0.3);
+      color: white;
+    }
+
+    /* Focus Styles */
+    :focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    /* Loading States */
+    .loading-skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes loading {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* Print Styles */
+    @media print {
+      .lot-player,
+      .live-fab,
+      .lot-navbar,
+      .lot-gradient-bar {
+        display: none !important;
+      }
+
+      body {
+        padding: 0;
+        background: white;
+        color: black;
+      }
+    }
   </style>
-
+  <style>
+    .live-drawer{
+      height: 90vh !important;
+    }
+    @media screen and (min-width:960px) {
+      .live-drawer{
+        height: 60vh !important;
+      }
+    }
+  </style>
   {% block head %}{% endblock %}
 </head>
 <body>
-  <div class="lot-accent-bar" aria-hidden="true"></div>
+  <div class="lot-gradient-bar" aria-hidden="true"></div>
 
-
-  <!-- Fixed Top Navbar -->
-  <nav class="navbar navbar-expand-lg lot-nav">
-    <div class="container h-100 g-3" style="gap: 10px;">
-        <img class="lot-brand-logo" src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth">
-        <span class="vr mx-2 opacity-50 d-none d-sm-inline"></span>
-        <button class="lot-brand navbar-brand btn-sm badge-live m" type="button" data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" data-live-open aria-controls="liveDrawer" title="Listen Live" style="border:none;">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg lot-navbar">
+    <div class="container-fluid px-3 px-lg-4 h-100">
+      <!-- Brand & Live Status -->
+      <div class="d-flex align-items-center gap-3">
+        <a href="{% url 'stream:past_list' %}" class="nav-brand">
+          <img src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth" class="nav-logo">
+        </a>
+        
+        <button class="live-status-badge" 
+                data-bs-toggle="offcanvas" 
+                data-bs-target="#liveDrawer"
+                aria-label="Live Stream Status">
           <i class="bi bi-broadcast-pin"></i>
-          <span class="d-none d-sm-inline">Live</span>
-          <span class="pulse-dot" aria-hidden="true"></span>
+          <span class="d-none d-sm-inline">LIVE</span>
+          <span class="live-pulse" aria-hidden="true"></span>
         </button>
+      </div>
 
-      <div class="d-flex align-items-center gap-2 ms-auto">
-        <!-- Up Next -->
-        <button class="btn btn-outline-light btn-sm" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#queueDrawer" aria-controls="queueDrawer"
-                title="Up Next">
+      <!-- Desktop Navigation -->
+      <div class="d-none d-lg-flex align-items-center gap-3">
+        <a href="{% url 'stream:past_list' %}" 
+           class="nav-link {% if request.resolver_match.url_name|inlist:'past_list' %}active{% endif %}">
+          <i class="bi bi-journal-music"></i>
+          <span>Streams</span>
+        </a>
+        
+        {% if request.user.is_staff %}
+          <a href="{% url 'stream:staff_dashboard' %}" 
+             class="nav-link {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+          </a>
+          
+          <a href="{% url 'stream:upload_sermon' %}" 
+             class="nav-link {% if request.resolver_match.url_name == 'upload_sermon' %}active{% endif %}">
+            <i class="bi bi-cloud-upload"></i>
+            <span>Upload</span>
+          </a>
+        {% endif %}
+        
+        <!-- Queue Button -->
+        <button class="btn btn-outline-light position-relative" 
+                data-bs-toggle="offcanvas" 
+                data-bs-target="#queueDrawer"
+                aria-label="Queue">
           <i class="bi bi-music-note-list"></i>
-          <span class="d-none d-sm-inline">Up Next</span>
-          <span class="badge text-bg-light ms-1" id="queueCount">0</span>
-        </button>
-
-        <!-- Mobile menu -->
-        <button class="btn btn-outline-light d-lg-none" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#lotOffcanvas" aria-controls="lotOffcanvas"
-                aria-label="Open menu">
-          <i class="bi bi-list"></i>
+          <span class="d-none d-sm-inline ms-1">Queue</span>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" 
+                id="queueCount">0</span>
         </button>
       </div>
 
-      <!-- Desktop links -->
-      <div class="collapse navbar-collapse d-none d-lg-flex" style="justify-content: end;">
-        <ul class="navbar-nav ms-3 mb-0">
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name|inlist:'past_list' %}active{% endif %}" href="{% url 'stream:past_list' %}">
-              <i class="bi bi-journal-music"></i> Streams
-            </a>
-          </li>
-          {% if request.user.is_staff %}
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'upload_sermon' %}active{% endif %}" href="{% url 'stream:upload_sermon' %}">
-              <i class="bi bi-upload"></i> Upload
-            </a>
-          </li>
-          {% endif %}
-        </ul>
-      </div>
+      <!-- Mobile Menu Toggle -->
+      <button class="btn btn-outline-light d-lg-none" 
+              type="button" 
+              data-bs-toggle="offcanvas" 
+              data-bs-target="#mobileOffcanvas"
+              aria-label="Open menu">
+        <i class="bi bi-list"></i>
+      </button>
     </div>
   </nav>
 
-  <!-- Global Live access pill -->
-  <div class="live-fab" id="liveFab" role="status" aria-live="polite">
-    <div class="d-flex align-items-center gap-2">
-      <span class="fab-dot" aria-hidden="true"></span>
-      <div class="meta">
-        <div class="label">Live Stream</div>
-        <div class="status" id="liveFabMeta">Tap to listen</div>
+  <!-- Live FAB -->
+  <div class="live-fab glass-panel" id="liveFab">
+    <div class="live-fab-content">
+      <span class="live-pulse"></span>
+      <div class="live-fab-text">
+        <div class="live-fab-title" id="liveFabStatus">LIVE NOW</div>
+        <div class="live-fab-subtitle" id="liveFabSong">Loading current song...</div>
       </div>
     </div>
-    <button class="btn btn-light btn-sm" type="button" data-live-open>
-      <i class="bi bi-broadcast-pin"></i> Listen
+    <button class="btn btn-primary btn-sm" 
+            data-bs-toggle="offcanvas" 
+            data-bs-target="#liveDrawer"
+            aria-label="Listen Live">
+      <i class="bi bi-play-fill me-1"></i> Listen
     </button>
   </div>
 
-<!-- Phone Sidebar -->
-<div class="offcanvas offcanvas-start lot-offcanvas" tabindex="-1" id="lotOffcanvas" aria-labelledby="lotOffcanvasLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title d-flex align-items-center gap-2" id="lotOffcanvasLabel">
-      <img class="lot-brand-logo" src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth">
-      <span class="vr mx-2 opacity-50 d-none d-sm-inline"></span>
-      <!-- Live button (opens live drawer; no navigation) -->
-      <button class="lot-brand navbar-brand btn-sm badge-live" type="button"
-              data-bs-toggle="offcanvas" data-bs-target="#liveDrawer" data-live-open aria-controls="liveDrawer"
-              title="Listen Live" style="border:none;">
-        <i class="bi bi-broadcast-pin"></i>
-        <span class="d-none d-sm-inline">Live</span>
-        <span class="pulse-dot" aria-hidden="true"></span>
-      </button>
-    </h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body d-flex flex-column">
-    <!-- Mobile search (SPA if available, else falls back to /past/?q=...) -->
-    <h5><i class="bi bi-journal-music"></i>Streams</h5>
-    <form id="ocSearch" class="d-flex gap-2 mb-3" role="search" aria-label="Search sermons">
-      <input class="form-control lot-search" name="q" placeholder="Search title, speaker, tag…">
-      <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
-      <button class="btn btn-outline-light" type="button" id="ocClear" title="Clear"><i class="bi bi-x-lg"></i></button>
-    </form>
-
-    <!-- Quick Picks (random 3) -->
-    <div class="oc-card p-3 mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="m-0 d-flex align-items-center gap-2"><i class="bi bi-stars"></i> Quick Picks</h6>
-        <button class="btn btn-outline-light btn-sm" id="ocShuffle" title="Shuffle"><i class="bi bi-shuffle"></i></button>
+  <!-- Main Content -->
+  <main id="main" class="container-fluid px-3 px-lg-4 py-4">
+    {% if messages %}
+      <div class="lot-messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center gap-2">
+              {% if message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill"></i>
+              {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <i class="bi bi-x-circle-fill"></i>
+              {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              {% else %}
+                <i class="bi bi-info-circle-fill"></i>
+              {% endif %}
+              <span>{{ message }}</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
       </div>
-      <ul id="ocQuickList" class="list-group list-group-flush small">
-        <!-- filled by JS -->
-      </ul>
-    </div>
+    {% endif %}
 
-    <!-- Top Tags -->
-    <div class="oc-card p-3 mb-3">
-      <h6 class="mb-2"><i class="bi bi-tags"></i> Popular Tags</h6>
-      <div id="ocTags" class="d-flex flex-wrap gap-2">
-        <!-- filled by JS -->
-      </div>
-    </div>
-
-    <!-- Navigation -->
-      {% if request.user.is_staff %}
-      <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'upload_sermon' %}active{% endif %}" href="{% url 'stream:upload_sermon' %}">
-          <i class="bi bi-upload"></i> Upload
-        </a>
-      </li>
-      {% endif %}
-    </ul>
-
-    <!-- Store card -->
-    <div class="oc-card p-3 mb-3">
-      <div class="d-flex align-items-center gap-3">
-        <div class="store-badge"><i class="bi bi-bag-heart"></i></div>
-        <div class="flex-grow-1">
-          <div class="fw-bold">Layers of Truth Store</div>
-          <div class="text-muted small">Faith-forward merch & resources. Ship to your door.</div>
-        </div>
-        <a class="btn btn-outline-light btn-sm" href="https://store.layersoftruth.org" target="_blank" rel="noopener">
-          <i class="bi bi-box-arrow-up-right"></i> Open
-        </a>
-      </div>
-    </div>
-
-    <!-- Socials -->
-    <div class="d-flex gap-3 mt-auto pt-2">
-      <a class="text-decoration-none" style="color:inherit" href="https://layersoftruth.org/" target="_blank" rel="noopener"><i class="bi bi-globe"></i></a>
-      <a class="text-decoration-none" style="color:inherit" href="https://x.com/Layers_of_Truth" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
-      <a class="text-decoration-none" style="color:inherit" href="https://www.youtube.com/@layersoftruth_ng" target="_blank" rel="noopener"><i class="bi bi-youtube"></i></a>
-      <a class="text-decoration-none" style="color:inherit" href="https://www.instagram.com/layersoftruth_ng/" target="_blank" rel="noopener"><i class="bi bi-instagram"></i></a>
-      <a class="text-decoration-none" style="color:inherit" href="https://www.facebook.com/layersoftruthng/" target="_blank" rel="noopener"><i class="bi bi-facebook"></i></a>
-    </div>
-  </div>
-</div>
-
-  {% if messages %}
-  <div class="lot-messages">
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'secondary' }} alert-dismissible fade show shadow-sm mb-2" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <main id="main">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="lot-footer py-4 mt-5">
-    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-      <div class="small">© {% now "Y" %} Layers of Truth</div>
-      <div class="d-flex align-items-center gap-3 small">
-        <a class="text-decoration-none" style="color:inherit" href="https://layersoftruth.org/" target="_blank" rel="noopener"><i class="bi bi-globe"></i> Website</a>
-        <a class="text-decoration-none" style="color:inherit" href="https://x.com/Layers_of_Truth" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://www.youtube.com/@layersoftruth_ng" target="_blank" rel="noopener"><i class="bi bi-youtube"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://www.instagram.com/layersoftruth_ng/" target="_blank" rel="noopener"><i class="bi bi-instagram"></i></a>
-        <a class="text-decoration-none" style="color:inherit" href="https://www.facebook.com/layersoftruthng/" target="_blank" rel="noopener"><i class="bi bi-facebook"></i></a>
+  <!-- Footer -->
+  <footer class="lot-footer">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+          <div class="d-flex align-items-center gap-3">
+            <img src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth" class="footer-logo">
+            <div>
+              <div class="fw-bold">Layers of Truth</div>
+              <div class="text-muted small">Unveiling spiritual insights</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4 mb-lg-0 text-center">
+          <div class="text-muted small">&copy; {% now "Y" %} Layers of Truth. All rights reserved.</div>
+        </div>
+        
+        <div class="col-lg-4">
+          <div class="footer-links">
+            <a href="https://layersoftruth.org/" target="_blank" class="footer-link">
+              <i class="bi bi-globe"></i>
+            </a>
+            <a href="https://x.com/Layers_of_Truth" target="_blank" class="footer-link">
+              <i class="bi bi-twitter-x"></i>
+            </a>
+            <a href="https://www.youtube.com/@layersoftruth_ng" target="_blank" class="footer-link">
+              <i class="bi bi-youtube"></i>
+            </a>
+            <a href="https://www.instagram.com/layersoftruth_ng/" target="_blank" class="footer-link">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="https://www.facebook.com/layersoftruthng/" target="_blank" class="footer-link">
+              <i class="bi bi-facebook"></i>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </footer>
 
-  <!-- Up Next (Queue) Drawer -->
-  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="queueDrawer" aria-labelledby="queueDrawerLabel" style="--bs-offcanvas-width: min(92vw, 400px);">
-    <div class="offcanvas-header border-bottom">
-      <h5 class="offcanvas-title" id="queueDrawerLabel"><i class="bi bi-music-note-list me-2"></i>Up Next</h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  <!-- Player -->
+  <div id="lot-player" class="lot-player">
+    <div class="player-seek">
+      <div class="player-seek-fill" id="lot-seek-fill"></div>
     </div>
-    <div class="offcanvas-body p-0 d-flex flex-column">
-      <div class="px-3 py-2 d-flex gap-2 border-bottom">
-        <button id="queueShuffle" class="btn btn-outline-light btn-sm"><i class="bi bi-shuffle"></i> Shuffle</button>
-        <button id="queueClear" class="btn btn-outline-danger btn-sm ms-auto"><i class="bi bi-trash3"></i> Clear</button>
-      </div>
-      <ul id="queueList" class="list-group list-group-flush small"></ul>
-    </div>
-  </div>
-
-  <!-- Sticky Global Player -->
-  <div id="lot-player" class="lot-player shadow-lg">
-    <div class="container py-2 d-flex align-items-center gap-3 flex-wrap justify-content-center">
-      <img id="lot-cover" class="rounded" alt="" style="width:54px;height:54px;object-fit:cover; background:#111">
-      <div class="flex-grow-1" style="max-width: 80%;">
-        <div class="d-flex align-items-center gap-2">
-          <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-          <div id="lot-title" class="fw-semibold small text-truncate">—</div>
-          <span class="text-light">•</span>
-          <div id="lot-artist" class="text-light small text-truncate">—</div>
+    
+    <div class="container h-100">
+      <div class="player-container">
+        <!-- Cover Art -->
+        <img id="lot-cover" class="player-cover" alt="Cover Art">
+        
+        <!-- Track Info -->
+        <div class="player-info">
+          <div id="lot-title" class="player-title">Not Playing</div>
+          <div id="lot-artist" class="player-artist">Select a sermon to begin</div>
         </div>
-        <input id="lot-seek" type="range" min="0" max="100" value="0" class="form-range my-1">
-        <div class="d-flex justify-content-between small text-light">
-          <span id="lot-cur">0:00</span><span id="lot-dur">0:00</span>
+        
+        <!-- Controls -->
+        <div class="player-controls">
+          <button class="player-btn" id="lot-shuffle" title="Shuffle">
+            <i class="bi bi-shuffle"></i>
+          </button>
+          
+          <button class="player-btn" id="lot-prev" title="Previous">
+            <i class="bi bi-skip-start-fill"></i>
+          </button>
+          
+          <button class="player-btn player-btn-primary" id="lot-toggle" title="Play">
+            <i class="bi bi-play-fill"></i>
+          </button>
+          
+          <button class="player-btn" id="lot-next" title="Next">
+            <i class="bi bi-skip-end-fill"></i>
+          </button>
+          
+          <button class="player-btn" id="lot-repeat" title="Repeat">
+            <i class="bi bi-repeat"></i>
+          </button>
+          
+          <select class="form-select form-select-sm ms-2" id="lot-speed" style="width: 90px;">
+            <option value="0.8">0.8×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+            <option value="2">2×</option>
+          </select>
+          
+          <button class="player-btn" 
+                  data-bs-toggle="offcanvas" 
+                  data-bs-target="#queueDrawer"
+                  title="Queue">
+            <i class="bi bi-music-note-list"></i>
+          </button>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-toggle btn-sm" id="lot-shuffle" title="Shuffle" aria-pressed="false"><i class="bi bi-shuffle"></i></button>
-        <button class="btn btn-light btn-sm" id="lot-prev" title="Prev"><i class="bi bi-skip-start-fill"></i></button>
-        <button class="btn btn-primary btn-sm px-3" id="lot-toggle" title="Play/Pause"><i class="bi bi-play-fill"></i></button>
-        <button class="btn btn-light btn-sm" id="lot-next" title="Next"><i class="bi bi-skip-end-fill"></i></button>
-        <button class="btn btn-toggle btn-sm" id="lot-repeat" title="Repeat: off" data-mode="none"><i class="bi bi-repeat"></i></button>
-
-        <select class="form-select form-select-sm" id="lot-speed" style="width:88px">
-          <option>0.8×</option><option selected>1×</option><option>1.25×</option><option>1.5×</option><option>2×</option>
-        </select>
-
-        <button class="btn btn-outline-light btn-sm" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#queueDrawer" aria-controls="queueDrawer"
-                title="Show Up Next">
-          <i class="bi bi-music-note-list"></i>
-        </button>
-      </div>
     </div>
+    
     <audio id="lot-audio" preload="metadata"></audio>
   </div>
 
-  <!-- Sermon Details Modal (glass) -->
-<div class="modal fade" id="sermonModal" tabindex="-1" aria-labelledby="sermonModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content text-bg-dark" style="background:rgba(20,28,46,.72); backdrop-filter:saturate(160%) blur(12px); border:1px solid rgba(255,255,255,.08); border-radius:16px;">
-      <div class="modal-header border-0">
-        <h5 class="modal-title d-flex align-items-center gap-2" id="sermonModalLabel">
-          <i class="bi bi-music-note-beamed"></i> <span id="md-title">—</span>
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body pt-0">
-        <div class="d-md-flex gap-3">
-          <img id="md-cover" alt="" style="width:160px;height:160px;object-fit:cover;border-radius:14px;background:#111;border:1px solid rgba(255,255,255,.12)">
-          <div class="flex-grow-1">
-            <div class="text-light small mb-2" id="md-meta">—</div>
-            <div class="mb-2" id="md-tags"></div>
-            <div class="d-flex flex-wrap gap-2 mb-3">
-              <button class="btn btn-primary js-play-now" id="md-play" data-slug=""><i class="bi bi-play-fill"></i> Play now</button>
-              <button class="btn btn-outline-light js-add-queue" id="md-queue" data-slug=""><i class="bi bi-plus-lg"></i> Add to queue</button>
-              <a id="md-download" class="btn btn-outline-light" target="_blank" href="#" download><i class="bi bi-download"></i> Download</a>
-              <button class="btn btn-outline-light" id="md-copy"><i class="bi bi-link-45deg"></i> Copy link</button>
-              <a id="md-open" class="btn btn-outline-secondary" href="#"><i class="bi bi-box-arrow-up-right"></i> Open page</a>
-            </div>
-            <p class="mb-0" id="md-desc" style="white-space:pre-wrap"></p>
-          </div>
-        </div>
-      </div>
+  <!-- Live Drawer -->
+  <div class="offcanvas offcanvas-bottom live-drawer" 
+       tabindex="-1" 
+       id="liveDrawer"
+       aria-labelledby="liveDrawerLabel">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title d-flex align-items-center gap-2" id="liveDrawerLabel">
+        <i class="bi bi-broadcast-pin"></i>
+        <span>Live Stream</span>
+        <span class="radio-status-indicator online ms-2" id="liveStatusBadge">ONLINE</span>
+      </h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-  </div>
-</div>
-<!-- Live Drawer (glassy, bottom) -->
-<div class="offcanvas offcanvas-bottom text-bg-dark" tabindex="-1" id="liveDrawer"
-     aria-labelledby="liveDrawerLabel" style="--bs-offcanvas-height: min(70vh, 540px);">
-  <div class="offcanvas-header border-bottom" style="background:rgba(255,255,255,.06)">
-    <h5 class="offcanvas-title d-flex align-items-center gap-2" id="liveDrawerLabel">
-      <i class="bi bi-broadcast-pin"></i> Live Stream
-    </h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-
-  <div class="offcanvas-body">
-    <div class="row g-3">
-      <div class="col-12 col-lg-8">
-        <!-- Host for Radio.co player -->
-        <div id="livePlayerHost" class="rounded-3 p-2"
-             style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);">
-          <!-- Your one-time Radio.co embed (auto-syncs when live) -->
-          <script src="https://embed.radio.co/player/05d5829.js"></script>
-        </div>
-        <small class="text-light d-block mt-2">The live player will automatically connect when we go live.</small>
-      </div>
-
-      <div class="col-12 col-lg-4">
-        <div class="rounded-3 p-3 h-100"
-             style="background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);">
-          <h6 class="mb-2">Now Live</h6>
-          <p class="text-light small mb-3">If on-demand audio is playing, we’ll pause it when we open Live.</p>
-          <div class="d-flex gap-2">
-            <button class="btn btn-outline-light btn-sm" data-bs-dismiss="offcanvas">
-              <i class="bi bi-x-lg"></i> Close
-            </button>
-            <button class="btn btn-outline-light btn-sm" id="liveMuteOndemand">
-              <i class="bi bi-pause-fill"></i> Pause On-Demand
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-
-  <script>
-    // Close the offcanvas when a nav link is clicked (mobile)
-    document.addEventListener('click', function(e){
-      const link = e.target.closest('.lot-offcanvas .nav-link');
-      if(!link) return;
-      const el = document.getElementById('lotOffcanvas');
-      if(!el) return;
-      const off = bootstrap.Offcanvas.getInstance(el) || new bootstrap.Offcanvas(el);
-      off.hide();
-    });
-  </script>
-
-  <script defer src="{% static 'assets/player.js' %}"></script>
-  <script>
-  (function(){
-    const sermonModal = document.getElementById('sermonModal');
-    if(!sermonModal) return;
-
-    const md = {
-      title: document.getElementById('md-title'),
-      meta: document.getElementById('md-meta'),
-      tags: document.getElementById('md-tags'),
-      cover: document.getElementById('md-cover'),
-      desc:  document.getElementById('md-desc'),
-      play:  document.getElementById('md-play'),
-      queue: document.getElementById('md-queue'),
-      open:  document.getElementById('md-open'),
-      dl:    document.getElementById('md-download'),
-      copy:  document.getElementById('md-copy')
-    };
-
-    async function loadSermon(slug){
-      const res = await fetch(`/api/sermons/${slug}.json`, {credentials:'same-origin'});
-      if(!res.ok) throw new Error('Failed');
-      return await res.json();
-    }
-
-    function renderTags(list){
-      if(!list || !list.length) return '';
-      return list.map(t=>`<span class="badge rounded-pill text-bg-dark border border-light-subtle me-1 mb-1">#${t}</span>`).join('');
-    }
-
-    // Intercept any link/button with .js-open-details
-    document.addEventListener('click', async (e)=>{
-      const btn = e.target.closest('.js-open-details');
-      if(!btn) return;
-      e.preventDefault();
-      const slug = btn.dataset.slug || btn.getAttribute('data-slug') || btn.href?.split('/').filter(Boolean).pop();
-      if(!slug) return;
-
-      try{
-        const s = await loadSermon(slug);
-        md.title.textContent = s.title || '—';
-        md.meta.textContent  = `${s.speaker || ''} • ${s.date_display || ''} • ${s.duration_hm || ''}`;
-        md.tags.innerHTML    = renderTags(s.tags || []);
-        md.cover.src         = s.cover || '';
-        md.desc.textContent  = s.description || '';
-        md.play.dataset.slug = slug;
-        md.queue.dataset.slug= slug;
-        md.open.href         = s.absolute_url || '#';
-        md.dl.href           = s.audio || '#';
-        md.copy.onclick      = async()=>{ try{ await navigator.clipboard.writeText(s.absolute_url || location.href); md.copy.innerHTML='<i class="bi bi-check2"></i> Copied'; setTimeout(()=>md.copy.innerHTML='<i class="bi bi-link-45deg"></i> Copy link',1200);}catch{} };
-
-        const modal = bootstrap.Modal.getOrCreateInstance(sermonModal);
-        modal.show();
-      }catch{
-        alert('Could not load details.');
-      }
-    });
-  })();
-  </script>
-<script>
-(function(){
-  const player = document.getElementById('lot-player');
-  const audio  = document.getElementById('lot-audio');
-  const cover  = document.getElementById('lot-cover');
-  const seek   = document.getElementById('lot-seek');
-
-  if(!player || !audio || !seek) return;
-
-  // 1) Blur glow from current cover
-  const updateGlow = () => {
-    const url = cover?.getAttribute('src');
-    if(url) player.style.setProperty('--cover-img', `url("${url}")`);
-    else    player.style.removeProperty('--cover-img');
-  };
-  // react if cover src changes (player.js usually sets it)
-  const mo = new MutationObserver(updateGlow);
-  if(cover) mo.observe(cover, { attributes:true, attributeFilter:['src'] });
-  updateGlow();
-
-  // 2) EQ animation toggle
-  const setPlayState = (running) => {
-    player.classList.toggle('is-playing', !!running);
-  };
-  audio.addEventListener('play',  ()=> setPlayState(true));
-  audio.addEventListener('pause', ()=> setPlayState(false));
-  audio.addEventListener('ended', ()=> setPlayState(false));
-
-  // 3) Played + buffered progress visualization
-  function pct(x, total){ return (!total || !isFinite(total)) ? 0 : Math.max(0, Math.min(100, x/total*100)); }
-  function updateBars(){
-    const played = pct(audio.currentTime||0, audio.duration||0);
-    let bufferedEnd = 0;
-    try{
-      const t = audio.currentTime||0, br = audio.buffered;
-      for(let i=0;i<br.length;i++){
-        const end = br.end(i);
-        if(end >= t){ bufferedEnd = end; break; }
-      }
-    }catch {}
-    const bufferedPct = pct(bufferedEnd, audio.duration||0);
-    seek.style.setProperty('--played', played + '%');
-    seek.style.setProperty('--buffered', bufferedPct + '%');
-  }
-  audio.addEventListener('timeupdate', updateBars);
-  audio.addEventListener('progress', updateBars);
-  audio.addEventListener('loadedmetadata', updateBars);
-  audio.addEventListener('seeking', updateBars);
-  updateBars();
-})();
-</script>
-<script>
-  (function(){
-    const liveDrawer = document.getElementById('liveDrawer');
-    const audio = document.getElementById('lot-audio');
-    if(!liveDrawer || !audio) return;
     
-    // If user has a "Live" <a> link, prevent navigation, just open drawer
-    document.addEventListener('click', (e)=>{
-      const a = e.target.closest('a.nav-link[href][data-bs-target="#liveDrawer"]');
-      if(a){ e.preventDefault(); }
-    });
-
-    liveDrawer.addEventListener('shown.bs.offcanvas', ()=>{
-      try { audio.pause(); } catch {}
-    });
-
-    document.getElementById('liveMuteOndemand')?.addEventListener('click', ()=>{
-      try { audio.pause(); } catch {}
-    });
-  })();
-</script>
-<script>
-(function(){
-  const oc = document.getElementById('lotOffcanvas');
-  if(!oc) return;
-
-  // Endpoints
-  const SIDEBAR_API = "{% url 'stream:sidebar_summary_json' %}";
-  // Try to read the list API from your page root; otherwise default to a known path
-  const pageRoot = document.getElementById('pageRoot');
-  const LIST_API = (pageRoot && pageRoot.dataset.api) ? pageRoot.dataset.api : "/api/sermons/";
-
-  // Main grid/pager targets
-  const grid  = document.getElementById('sermonGrid');
-  const pager = document.getElementById('paginationBar');
-
-  // Offcanvas controls
-  const quickList = document.getElementById('ocQuickList');
-  const tagsWrap  = document.getElementById('ocTags');
-  const form      = document.getElementById('ocSearch');
-  const btnClear  = document.getElementById('ocClear');
-  const btnShuffle= document.getElementById('ocShuffle');
-
-  // Utils
-  const esc = s => (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  function hideOffcanvas(){
-    const inst = bootstrap.Offcanvas.getInstance(oc) || new bootstrap.Offcanvas(oc);
-    inst.hide();
-  }
-
-  // ---------- SPA List Rendering (no reload) ----------
-  function tagHTML(list){
-    return (list||[]).map(t=>`<span class="tag-pill">#${esc(t)}</span>`).join('');
-  }
-
-  function cardHTML(it){
-    return `
-    <div class="col-12 col-sm-6">
-      <div class="lot-card h-100 position-relative" data-slug="${esc(it.slug)}">
-        <div class="lot-thumb">
-          ${it.cover ? `<img src="${esc(it.cover)}" alt="${esc(it.title)}" loading="lazy" decoding="async">` : ``}
-          <div class="lot-actions">
-            <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play now" aria-label="Play now"><i class="bi bi-play-fill"></i></button>
-            <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Add to queue" aria-label="Add to queue"><i class="bi bi-plus-lg"></i></button>
+    <div class="offcanvas-body">
+      <div class="row g-4">
+        <!-- Player -->
+        <div class="col-lg-8">
+          <div class="live-player-embed">
+            <!-- Radio.co Player 1 -->
+            <script src="https://embed.radio.co/player/05d5829.js"></script>
+            <div class="loading-skeleton" style="height:400px;"></div>
           </div>
-          <div class="lot-overlay">
-            <span class="lot-chip"><i class="bi bi-clock-history"></i> ${esc(it.duration_hm || "—")}</span>
-            <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" aria-label="Details">
-              <i class="bi bi-box-arrow-up-right"></i> <span class="d-none d-sm-inline">Details</span>
+          
+          <div class="mt-3 d-flex flex-wrap gap-2">
+            <a href="https://streaming.radio.co/s1702795f8/listen" 
+               target="_blank" 
+               class="btn btn-outline-light btn-sm">
+              <i class="bi bi-play-fill me-1"></i> Direct Stream (192kbps)
+            </a>
+            
+            <a href="http://streaming.radio.co/s1702795f8/listen.m3u" 
+               target="_blank" 
+               class="btn btn-outline-light btn-sm">
+              <i class="bi bi-list-ul me-1"></i> Playlist (M3U)
+            </a>
+            
+            <button class="btn btn-outline-light btn-sm" onclick="pauseOndemand()">
+              <i class="bi bi-pause-fill me-1"></i> Pause On-Demand
             </button>
           </div>
         </div>
-        <div class="p-3">
-          <div class="fw-bold text-truncate" title="${esc(it.title)}">${esc(it.title)}</div>
-          <div class="text-muted small mb-2">${esc(it.speaker||"")} ${it.date_display ? '| '+esc(it.date_display) : ''}</div>
-          ${it.tags && it.tags.length ? `<div class="mb-2">${tagHTML(it.tags)}</div>` : ``}
-          <div class="d-flex gap-2 flex-wrap">
-            <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" aria-label="Play"><i class="bi bi-play-fill"></i> <span class="actions-label">Play</span></button>
-            <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" aria-label="Queue"><i class="bi bi-plus-lg"></i> <span class="actions-label">Queue</span></button>
-            <button type="button" class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" aria-label="Details"><i class="bi bi-box-arrow-up-right"></i> <span class="actions-label">Details</span></button>
+        
+        <!-- Live Info -->
+        <div class="col-lg-4">
+          <div class="live-info-card">
+            <div class="live-info-title">Now Playing</div>
+            
+            <div class="live-info-item">
+              <div class="live-info-label">Status:</div>
+              <div class="live-info-value">
+                <span id="radioStatus">Loading...</span>
+              </div>
+            </div>
+            
+            <div class="live-info-item">
+              <div class="live-info-label">Song:</div>
+              <div class="live-info-value" id="radioSong">—</div>
+            </div>
+            
+            <div class="live-info-item">
+              <div class="live-info-label">DJ:</div>
+              <div class="live-info-value" id="radioDJ">—</div>
+            </div>
+            
+            <div class="live-info-item">
+              <div class="live-info-label">Artwork:</div>
+              <div class="live-info-value">
+                <img id="radioArtwork" class="radio-album-art d-none" alt="Album Art">
+                <span id="radioArtworkText" class="text-muted">None</span>
+              </div>
+            </div>
+            
+            <div class="mt-4 pt-3 border-top">
+              <p class="small text-muted mb-2">
+                <i class="bi bi-info-circle me-1"></i>
+                When live streaming, on-demand audio will be paused automatically.
+              </p>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" onclick="openPlayer2()">
+                  <i class="bi bi-play-circle me-1"></i> Alternative Player
+                </button>
+                <button class="btn btn-outline-light btn-sm" data-bs-dismiss="offcanvas">
+                  <i class="bi bi-x-lg me-1"></i> Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>`;
-  }
+    </div>
+  </div>
 
-  function pagerHTML(page, pages, hasPrev, hasNext){
-    return `
-      <ul class="pagination">
-        ${hasPrev ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page-1}">Prev</a></li>` : ``}
-        <li class="page-item disabled"><span class="page-link">Page ${page} of ${pages}</span></li>
-        ${hasNext ? `<li class="page-item"><a class="page-link js-page" href="#" data-page="${page+1}">Next</a></li>` : ``}
-      </ul>`;
-  }
-
-  async function spaLoad(params = {}, doPush = true){
-    // Build URL to list API
-    const url = new URL(LIST_API, location.origin);
-    Object.entries(params).forEach(([k,v])=>{
-      if(v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
-    });
-
-    const res = await fetch(url, { credentials:'same-origin' });
-    if(!res.ok) return;
-    const data = await res.json();
-
-    // Render to grid + pager
-    if(grid){
-      grid.innerHTML = data.items.map(cardHTML).join("") ||
-        `<div class="col"><div class="alert alert-secondary">No sermons yet.</div></div>`;
-    }
-    if(pager){
-      pager.innerHTML = pagerHTML(data.page, data.pages, data.has_prev, data.has_next);
-    }
-
-    // Update the address bar without reload
-    if(doPush){
-      const qs = url.searchParams.toString();
-      history.pushState({ q:url.searchParams.get('q') || '', page:data.page }, "", qs ? `?${qs}` : location.pathname);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
-  // ---------- Offcanvas data (quick picks + tags) ----------
-  function rowHTML(it){
-    return `
-    <li class="list-group-item px-0 py-2">
-      <div class="d-flex align-items-center gap-2">
-        <img class="thumb" src="${esc(it.cover||'')}" alt="">
-        <div class="flex-grow-1">
-          <div class="small fw-semibold text-truncate">${esc(it.title)}</div>
-          <div class="text-muted small">${esc(it.speaker||'')} ${it.duration_hm ? '• '+esc(it.duration_hm) : ''}</div>
-        </div>
-        <div class="d-flex gap-1">
-          <button class="btn btn-primary btn-sm js-play-now" data-slug="${esc(it.slug)}" title="Play"><i class="bi bi-play-fill"></i></button>
-          <button class="btn btn-outline-light btn-sm js-add-queue" data-slug="${esc(it.slug)}" title="Queue"><i class="bi bi-plus-lg"></i></button>
-          <button class="btn btn-outline-light btn-sm js-open-details" data-slug="${esc(it.slug)}" title="Details"><i class="bi bi-box-arrow-up-right"></i></button>
+  <!-- Queue Drawer -->
+  <div class="offcanvas offcanvas-end queue-drawer" 
+       tabindex="-1" 
+       id="queueDrawer"
+       aria-labelledby="queueDrawerLabel">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title" id="queueDrawerLabel">
+        <i class="bi bi-music-note-list me-2"></i>
+        Up Next
+        <span class="badge bg-primary ms-2" id="queueCountBadge">0</span>
+      </h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <div class="offcanvas-body">
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-outline-light btn-sm" id="queueShuffle">
+          <i class="bi bi-shuffle me-1"></i> Shuffle
+        </button>
+        <button class="btn btn-outline-danger btn-sm ms-auto" id="queueClear">
+          <i class="bi bi-trash3 me-1"></i> Clear All
+        </button>
+      </div>
+      
+      <div id="queueList" class="queue-list">
+        <!-- Queue items will be inserted here -->
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-music-note-list display-6 mb-3"></i>
+          <p>Your queue is empty</p>
+          <p class="small">Add sermons from the library to get started</p>
         </div>
       </div>
-    </li>`;
-  }
-  function tagBtn(name){ return `<button type="button" class="btn oc-tag js-quick" data-q="${esc(name)}">#${esc(name)}</button>`; }
+    </div>
+  </div>
 
-  async function loadSidebar(){
-    try{
-      quickList.innerHTML = `<li class="list-group-item px-0"><div class="oc-skel"></div></li>
-                             <li class="list-group-item px-0"><div class="oc-skel"></div></li>
-                             <li class="list-group-item px-0"><div class="oc-skel"></div></li>`;
-      tagsWrap.innerHTML = `<div class="oc-skel" style="height:28px;width:60%"></div>`;
+  <!-- Mobile Offcanvas -->
+  <div class="offcanvas offcanvas-start mobile-offcanvas" 
+       tabindex="-1" 
+       id="mobileOffcanvas"
+       aria-labelledby="mobileOffcanvasLabel">
+    <div class="offcanvas-header border-bottom">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}" alt="Layers of Truth" style="height: 36px;">
+        <h5 class="offcanvas-title gradient-text fw-bold mb-0">Menu</h5>
+      </div>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <div class="offcanvas-body d-flex flex-column gap-4">
+      <!-- Search -->
+      <div class="mb-3">
+        <h6 class="fw-bold mb-3">Search Sermons</h6>
+        <form id="mobileSearch" class="d-flex gap-2" role="search">
+          <div class="flex-grow-1 position-relative">
+            <input type="search" class="form-control glass-panel border-0" 
+                   placeholder="Title, speaker, tag..." 
+                   aria-label="Search sermons">
+            <i class="bi bi-search position-absolute top-50 end-3 translate-middle-y text-muted"></i>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i>
+          </button>
+        </form>
+      </div>
+      
+      <!-- Navigation -->
+      <div>
+        <h6 class="fw-bold mb-3">Navigation</h6>
+        <div class="d-flex flex-column gap-2">
+          <a href="{% url 'stream:past_list' %}" class="nav-link">
+            <i class="bi bi-journal-music"></i>
+            All Streams
+          </a>
+          
+          {% if request.user.is_staff %}
+            <a href="{% url 'stream:staff_dashboard' %}" class="nav-link">
+              <i class="bi bi-speedometer2"></i>
+              Dashboard
+            </a>
+            
+            <a href="{% url 'stream:upload_sermon' %}" class="nav-link">
+              <i class="bi bi-cloud-upload"></i>
+              Upload Sermon
+            </a>
+          {% endif %}
+          
+          <a href="https://store.layersoftruth.org" target="_blank" class="nav-link">
+            <i class="bi bi-bag-heart"></i>
+            Store
+          </a>
+        </div>
+      </div>
+      
+      <!-- Quick Picks -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0">Quick Picks</h6>
+          <button class="btn btn-outline-light btn-sm" id="mobileShuffle">
+            <i class="bi bi-shuffle"></i>
+          </button>
+        </div>
+        
+        <div id="mobileQuickList" class="d-flex flex-column gap-2">
+          <!-- Quick picks will be loaded here -->
+          <div class="loading-skeleton" style="height: 60px;"></div>
+          <div class="loading-skeleton" style="height: 60px;"></div>
+          <div class="loading-skeleton" style="height: 60px;"></div>
+        </div>
+      </div>
+      
+      <!-- Tags -->
+      <div>
+        <h6 class="fw-bold mb-3">Popular Tags</h6>
+        <div id="mobileTags" class="d-flex flex-wrap gap-2">
+          <!-- Tags will be loaded here -->
+          <span class="loading-skeleton" style="width: 80px; height: 32px;"></span>
+          <span class="loading-skeleton" style="width: 60px; height: 32px;"></span>
+          <span class="loading-skeleton" style="width: 100px; height: 32px;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      const res = await fetch(SIDEBAR_API, { credentials:'same-origin' });
-      const data = await res.json();
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="{% static 'assets/player.js' %}"></script> -->
+  
+  <!-- Radio.co Integration
+  <script src="https://embed.radio.co/embed/s1702795f8/status.js"></script>
+  <script src="https://embed.radio.co/embed/s1702795f8/dj.js"></script>
+  <script src="https://embed.radio.co/embed/s1702795f8/artwork.js"></script>
+  <script src="https://embed.radio.co/embed/s1702795f8/song.js"></script> -->
+  
+  <!-- Alternative Player Script (hidden) -->
+  <div id="player2Container" style="display: none;">
+    <script src="https://embed.radio.co/player/57315ab.js"></script>
+  </div>
 
-      quickList.innerHTML = (data.random_items||[]).map(rowHTML).join('') ||
-        `<li class="list-group-item px-0 text-muted small">No picks yet.</li>`;
-      tagsWrap.innerHTML = (data.top_tags||[]).slice(0,12).map(t=>tagBtn(t.name)).join('') ||
-        `<span class="text-muted small">No tags yet.</span>`;
-    }catch(e){
-      console.error(e);
-      quickList.innerHTML = `<li class="list-group-item px-0 text-muted small">Could not load picks.</li>`;
-      tagsWrap.innerHTML = `<span class="text-muted small">Could not load tags.</span>`;
-    }
-  }
+  <script>
+  const img = document.querySelectorAll("current-artwork");
+  img.forEach(element => element.removeAttribute("crossorigin"));
+  // Global configuration
+  const LOT_CONFIG = {
+    radioStation: 's1702795f8',
+    apiBase: '{% url "stream:sidebar_summary_json" %}',
+    statusUrl: 'https://public.radio.co/stations/s1702795f8/status'
+  };
 
-  // ---------- Event wiring (no reloads) ----------
-  // Open: refresh quick picks/tags
-  oc.addEventListener('shown.bs.offcanvas', loadSidebar);
-  // Shuffle quick picks
-  btnShuffle?.addEventListener('click', loadSidebar);
-
-  // Submit search (SPA only)
-  form?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const q = form.q.value.trim();
-    await spaLoad({ q, page:1 });
-    hideOffcanvas();
-  });
-
-  // Clear search (SPA only)
-  btnClear?.addEventListener('click', async ()=>{
-    form.q.value = '';
-    await spaLoad({ q:'', page:1 });
-    hideOffcanvas();
-  });
-
-  // Quick tag → SPA search
-  document.addEventListener('click', async (e)=>{
-    const tag = e.target.closest('.js-quick');
-    if(tag){
+  // Suppress noisy CORS image errors from the radio.co artwork host
+  window.addEventListener('error', function (e) {
+    const t = e.target || {};
+    const src = t.src || "";
+    if (t.tagName === 'IMG' && src.includes('media.radio.co/artwork')) {
       e.preventDefault();
-      await spaLoad({ q: tag.dataset.q || '', page:1 });
-      hideOffcanvas();
     }
+  }, true);
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeRadioIntegration();
+    initializeUI();
+    initializeEventListeners();
   });
 
-  // Intercept "Past Streams" link in the offcanvas → SPA list, no nav
-  oc.addEventListener('click', async (e)=>{
-    const a = e.target.closest('a.nav-link[href]');
-    if(!a) return;
-    if (a.href.includes('/past')) {
-      e.preventDefault();
-      // keep current filters if present; otherwise load page 1
-      const params = Object.fromEntries(new URL(location.href).searchParams.entries());
-      params.page = 1;
-      await spaLoad(params);
-      hideOffcanvas();
-    }
-  });
+  // Radio.co Integration
+  function initializeRadioIntegration() {
+    // Status updates
+    setInterval(() => {
+      fetchRadioStatus();
+    }, 30000); // Update every 30 seconds
 
-  // Intercept pagination links and handle SPA (works with our pagerHTML)
-  document.addEventListener('click', async (e)=>{
-    const link = e.target.closest('a.page-link.js-page');
-    if(!link) return;
-    e.preventDefault();
-    const page = parseInt(link.dataset.page || "1", 10);
-    const url = new URL(location.href);
-    const params = Object.fromEntries(url.searchParams.entries());
-    params.page = page;
-    await spaLoad(params);
-  });
-
-  // Expose spaLoad if you want to trigger it elsewhere
-  window.spaLoad = spaLoad;
-})();
-</script>
-<script>
-// Global Live access: opens live drawer + polls Radio.co status
-(function(){
-  const liveFab = document.getElementById('liveFab');
-  const liveMeta = document.getElementById('liveFabMeta');
-  const liveButtons = document.querySelectorAll('[data-live-open]');
-  const statusUrl = "https://public.radio.co/stations/05d5829/status";
-
-  function openLiveDrawer(){
-    const el = document.getElementById('liveDrawer');
-    if(!el) return;
-    const inst = bootstrap.Offcanvas.getOrCreateInstance(el);
-    inst.show();
+    fetchRadioStatus();
   }
 
-  liveButtons.forEach(btn=>{
-    btn.addEventListener('click', (e)=>{ e.preventDefault(); openLiveDrawer(); });
-  });
-
-  async function refreshLive(){
-    if(!liveFab || !liveMeta) return;
-    try{
-      const res = await fetch(statusUrl, { cache:'no-store' });
-      if(!res.ok) throw new Error('net');
-      const data = await res.json();
-      const onAir = String(data.status || '').toLowerCase() === 'online';
-      const title = data?.current_track?.title || '';
-      liveMeta.textContent = onAir ? (title || 'Streaming now') : 'Off-air · tap to check';
-      liveFab.classList.toggle('is-offline', !onAir);
-    }catch(err){
-      liveMeta.textContent = 'Tap to listen';
-      liveFab?.classList.remove('is-offline');
+  async function fetchRadioStatus() {
+    try {
+      const response = await fetch(LOT_CONFIG.statusUrl);
+      const data = await response.json();
+      
+      const isOnline = data.status === 'online';
+      const song = data.current_track?.title || 'No song information';
+      const dj = data.current_track?.artist || 'Layers of Truth';
+      const artwork = data.current_track?.artwork_url;
+      
+      // Update UI
+      updateLiveStatus(isOnline, song, dj, artwork);
+    } catch (error) {
+      console.error('Failed to fetch radio status:', error);
+      updateLiveStatus(false, 'Connection Error', '—', null);
     }
   }
 
-  refreshLive();
-  setInterval(refreshLive, 60000);
-})();
-</script>
+  function updateLiveStatus(isOnline, song, dj, artwork) {
+    // Update FAB
+    const fabStatus = document.getElementById('liveFabStatus');
+    const fabSong = document.getElementById('liveFabSong');
+    const statusBadge = document.getElementById('liveStatusBadge');
+    
+    if (fabStatus) fabStatus.textContent = isOnline ? 'LIVE NOW' : 'OFFLINE';
+    if (fabSong) fabSong.textContent = song;
+    
+    if (statusBadge) {
+      statusBadge.textContent = isOnline ? 'ONLINE' : 'OFFLINE';
+      statusBadge.className = `radio-status-indicator ${isOnline ? 'online' : 'offline'}`;
+    }
+    
+    // Update drawer info
+    const radioStatus = document.getElementById('radioStatus');
+    const radioSong = document.getElementById('radioSong');
+    const radioDJ = document.getElementById('radioDJ');
+    const radioArtwork = document.getElementById('radioArtwork');
+    const radioArtworkText = document.getElementById('radioArtworkText');
+    
+    if (radioStatus) radioStatus.textContent = isOnline ? 'Online' : 'Offline';
+    if (radioSong) radioSong.textContent = song;
+    if (radioDJ) radioDJ.textContent = dj;
+    
+    if (artwork) {
+      if (radioArtwork) {
+        radioArtwork.src = artwork;
+        radioArtwork.classList.remove('d-none');
+      }
+      if (radioArtworkText) {
+        radioArtworkText.textContent = '';
+      }
+    } else {
+      if (radioArtwork) radioArtwork.classList.add('d-none');
+      if (radioArtworkText) radioArtworkText.textContent = 'None';
+    }
+    
+    // Update live badge pulse
+    const livePulse = document.querySelector('.live-pulse');
+    if (livePulse) {
+      if (isOnline) {
+        livePulse.style.animationPlayState = 'running';
+      } else {
+        livePulse.style.animationPlayState = 'paused';
+        livePulse.style.backgroundColor = '#6c757d';
+      }
+    }
+  }
 
+  // UI Initialization
+  function initializeUI() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize player seek bar
+    const audio = document.getElementById('lot-audio');
+    const seekFill = document.getElementById('lot-seek-fill');
+    
+    if (audio && seekFill) {
+      audio.addEventListener('timeupdate', function() {
+        const percentage = (audio.currentTime / audio.duration) * 100 || 0;
+        seekFill.style.width = `${percentage}%`;
+      });
+    }
+
+    // Load mobile quick picks
+    loadMobileQuickPicks();
+  }
+
+  // Event Listeners
+  function initializeEventListeners() {
+    // Live drawer opens - pause on-demand audio
+    const liveDrawer = document.getElementById('liveDrawer');
+    const liveFab = document.getElementById('liveFab');
+    if (liveDrawer) {
+      liveDrawer.addEventListener('shown.bs.offcanvas', function() {
+        pauseOndemand();
+        liveFab?.classList.add('d-none');
+      });
+      liveDrawer.addEventListener('hidden.bs.offcanvas', function() {
+        liveFab?.classList.remove('d-none');
+      });
+    }
+
+    // Mobile search
+    const mobileSearch = document.getElementById('mobileSearch');
+    if (mobileSearch) {
+      mobileSearch.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = this.querySelector('input').value;
+        if (query) {
+          window.location.href = `{% url 'stream:past_list' %}?q=${encodeURIComponent(query)}`;
+        }
+      });
+    }
+
+    // Mobile shuffle
+    const mobileShuffle = document.getElementById('mobileShuffle');
+    if (mobileShuffle) {
+      mobileShuffle.addEventListener('click', function() {
+        loadMobileQuickPicks();
+      });
+    }
+
+    // Queue controls
+    const queueShuffle = document.getElementById('queueShuffle');
+    const queueClear = document.getElementById('queueClear');
+    
+    if (queueShuffle) {
+      queueShuffle.addEventListener('click', function() {
+        if (window.lotPlayer && window.lotPlayer.shuffleQueue) {
+          window.lotPlayer.shuffleQueue();
+        }
+      });
+    }
+    
+    if (queueClear) {
+      queueClear.addEventListener('click', function() {
+        if (window.lotPlayer && window.lotPlayer.clearQueue) {
+          window.lotPlayer.clearQueue();
+        }
+      });
+    }
+  }
+
+  // Helper Functions
+  function pauseOndemand() {
+    const audio = document.getElementById('lot-audio');
+    if (audio && !audio.paused) {
+      audio.pause();
+      
+      // Show notification
+      showNotification('On-demand audio paused for live stream');
+    }
+  }
+
+  function openPlayer2() {
+    // Create a modal for player 2
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-panel">
+          <div class="modal-header border-bottom">
+            <h5 class="modal-title">Alternative Player</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="player2Embed" style="min-height: 400px;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Load player 2 after modal is shown
+    modal.addEventListener('shown.bs.modal', function() {
+      const embedDiv = document.getElementById('player2Embed');
+      if (embedDiv) {
+        // This would require additional setup for the second player
+        embedDiv.innerHTML = `
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Alternative player would load here. Using primary player for now.
+          </div>
+        `;
+      }
+    });
+    
+    // Clean up on hide
+    modal.addEventListener('hidden.bs.modal', function() {
+      document.body.removeChild(modal);
+    });
+  }
+
+  function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+      top: 100px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 350px;
+      box-shadow: var(--shadow-lg);
+    `;
+    
+    notification.innerHTML = `
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 5000);
+  }
+
+  async function loadMobileQuickPicks() {
+    const quickList = document.getElementById('mobileQuickList');
+    const tagsList = document.getElementById('mobileTags');
+    
+    if (!quickList || !tagsList) return;
+    
+    try {
+      const response = await fetch(LOT_CONFIG.apiBase);
+      const data = await response.json();
+      
+      // Update quick picks
+      if (data.random_items && data.random_items.length > 0) {
+        quickList.innerHTML = data.random_items.map(item => `
+          <div class="queue-item">
+            <img src="${item.cover || ''}" alt="${item.title}" class="queue-item-cover">
+            <div class="queue-item-info">
+              <div class="queue-item-title">${item.title}</div>
+              <div class="queue-item-meta">${item.speaker || ''}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" 
+                    onclick="window.lotPlayer?.playItem('${item.slug}')">
+              <i class="bi bi-play-fill"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+      
+      // Update tags
+      if (data.top_tags && data.top_tags.length > 0) {
+        tagsList.innerHTML = data.top_tags.slice(0, 8).map(tag => `
+          <button class="btn btn-outline-light btn-sm" 
+                  onclick="window.location.href='{% url 'stream:past_list' %}?tag=${tag.name}'">
+            #${tag.name}
+          </button>
+        `).join('');
+      }
+    } catch (error) {
+      console.error('Failed to load mobile quick picks:', error);
+    }
+  }
+
+  // Expose functions to global scope
+  window.LOT = {
+    pauseOndemand,
+    openPlayer2,
+    showNotification,
+    fetchRadioStatus
+  };
+  </script>
+
+  {% block scripts %}{% endblock %}
 </body>
 </html>
