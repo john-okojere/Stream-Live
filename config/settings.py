@@ -30,6 +30,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 AUTH_USER_MODEL = 'accounts.User'
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+USE_S3 = config('USE_S3', default=True, cast=bool)
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
@@ -155,40 +156,40 @@ ANALYTICS_GEOIP_DB_PATH = BASE_DIR / "geo/GeoLite2-City.mmdb"
 
 # Static & Media Files
 
-INSTALLED_APPS += ['storages']
+if USE_S3:
+    INSTALLED_APPS += ['storages']
 
-AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", "us-east-1")  # default to us-east-1 if not set
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", "us-east-1")  # default to us-east-1 if not set
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-AWS_LOCATION_STATIC = "dashboard/static"
-AWS_LOCATION_MEDIA = "dashboard/media"
-AWS_S3_OBJECT_PARAMETERS = {
-    "CacheControl": "max-age=86400",
-}
-AWS_STATIC_LOCATION = AWS_LOCATION_STATIC
-AWS_MEDIA_LOCATION = AWS_LOCATION_MEDIA
-STATICFILES_LOCATION = AWS_STATIC_LOCATION
-MEDIAFILES_LOCATION = AWS_MEDIA_LOCATION
-STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/"
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/"
-
-AWS_QUERYSTRING_AUTH = False  # makes URLs public (optional)
-
-# ✅ NEW: Tell Django to use S3 backends (this was the missing engine!)
-STORAGES = {
-    "default": {
-        "BACKEND": "config.storages.MediaStorage"
-    },
-    "staticfiles": {
-        "BACKEND": "config.storages.StaticStorage"
+    AWS_LOCATION_STATIC = "dashboard/static"
+    AWS_LOCATION_MEDIA = "dashboard/media"
+    AWS_S3_OBJECT_PARAMETERS = {
+        "CacheControl": "max-age=86400",
     }
-}
+    AWS_STATIC_LOCATION = AWS_LOCATION_STATIC
+    AWS_MEDIA_LOCATION = AWS_LOCATION_MEDIA
+    STATICFILES_LOCATION = AWS_STATIC_LOCATION
+    MEDIAFILES_LOCATION = AWS_MEDIA_LOCATION
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/"
 
-STATICFILES_STORAGE = 'config.storages.StaticStorage'
-DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'
+    AWS_QUERYSTRING_AUTH = False  # makes URLs public (optional)
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "config.storages.MediaStorage"
+        },
+        "staticfiles": {
+            "BACKEND": "config.storages.StaticStorage"
+        }
+    }
+
+    STATICFILES_STORAGE = 'config.storages.StaticStorage'
+    DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'
 
 # Security Settings
 SESSION_COOKIE_SECURE = not DEBUG

@@ -8,7 +8,7 @@
   const titleEl  = $('#lot-title');
   const artistEl = $('#lot-artist');
   const coverEl  = $('#lot-cover');
-  const seekEl   = $('#lot-seek');
+  const seekEl   = $('#lot-seek-fill');
   const curEl    = $('#lot-cur');
   const durEl    = $('#lot-dur');
   const toggleEl = $('#lot-toggle');
@@ -21,6 +21,30 @@
   const queueCount=$('#queueCount');
   const queueClear=$('#queueClear');
   const queueShuffle=$('#queueShuffle');
+  const queueCountBadge=$('#queueCountBadge');
+  const defaultCover = (document.body && document.body.dataset && document.body.dataset.defaultCover) || '';
+  const controlsPresent = toggleEl && nextEl && prevEl && shuffleEl && repeatEl;
+  const liveFrameHost = document.querySelector('#livePlayerHost iframe');
+
+  const setBtnLoading = (btn, on) => {
+    if(!btn) return;
+    btn.disabled = !!on;
+    btn.classList.toggle('disabled', !!on);
+    if(on){
+      btn.dataset.originalHtml = btn.dataset.originalHtml || btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    } else if(btn.dataset.originalHtml){
+      btn.innerHTML = btn.dataset.originalHtml;
+    }
+  };
+
+  const stopLiveStream = ()=>{
+    // best-effort: blank any Radio.co iframe if present to avoid dual audio
+    if(liveFrameHost && liveFrameHost.src && liveFrameHost.src !== 'about:blank'){
+      liveFrameHost.dataset.prevSrc = liveFrameHost.src;
+      liveFrameHost.src = 'about:blank';
+    }
+  };
 
   // State
   let queue = JSON.parse(localStorage.getItem('lot_queue_v1')||'[]');
@@ -75,6 +99,7 @@
   function renderQueue(){
     // Counter
     if(queueCount) queueCount.textContent = String(queue.length);
+    if(queueCountBadge) queueCountBadge.textContent = String(queue.length);
 
     if(!queueList) return;
     queueList.innerHTML = '';
@@ -93,7 +118,7 @@
       if(i === idx) li.classList.add('active');
 
       li.innerHTML = `
-        <img src="${item.cover || ''}" alt="" style="width:34px;height:34px;object-fit:cover;background:#111" class="rounded">
+        <img src="${item.cover || defaultCover}" alt="" style="width:34px;height:34px;object-fit:cover;background:#111" class="rounded">
         <div class="flex-grow-1" style="max-width:185px;">
           <div class="text-truncate">${item.title}</div>
           <div class="text-light text-truncate">${item.speaker || ''}</div>
@@ -106,6 +131,11 @@
   }
 
   async function playSlug(slug, pushToQueue=true){
+    let srcBtn;
+    try{
+      srcBtn = document.querySelector(`.js-play-now[data-slug="${slug}"]`);
+      setBtnLoading(srcBtn, true);
+    }catch(_){}
     try{
       const meta = await fetchSermon(slug);
       if(pushToQueue){ queue.push(meta); idx = queue.length-1; save(); }
@@ -118,6 +148,8 @@
         setTimeout(()=>root.classList.remove('shake'), 400);
       }
       alert('Could not load this audio item.');
+    } finally {
+      setBtnLoading(srcBtn, false);
     }
   }
 
@@ -126,7 +158,7 @@
 
     titleEl.textContent = cur.title;
     artistEl.textContent= cur.speaker || '—';
-    coverEl.src = cur.cover || '';
+    coverEl.src = cur.cover || defaultCover || '';
     // set glass background from cover
     if(cur.cover){
         root.style.setProperty('--cover-img', `url("${cur.cover}")`);
@@ -143,12 +175,13 @@
 
     document.title = `${cur.title} — LOT`;
     renderQueue();
+    stopLiveStream(); // avoid live + on-demand at the same time
 
     // Media Session
     if('mediaSession' in navigator){
       navigator.mediaSession.metadata = new MediaMetadata({
         title: cur.title, artist: cur.speaker||'',
-        artwork: cur.cover? [{src:cur.cover,sizes:'512x512'}]:[]
+        artwork: cur.cover? [{src:cur.cover,sizes:'512x512'}] : (defaultCover ? [{src:defaultCover,sizes:'512x512'}] : [])
       });
       navigator.mediaSession.setActionHandler('previoustrack', prev);
       navigator.mediaSession.setActionHandler('nexttrack', next);
@@ -197,25 +230,27 @@
     save(); loadCurrent(true);
   }
 
-  // Main controls
-  toggleEl.addEventListener('click', ()=>{ if(audio.paused){ audio.play(); } else { audio.pause(); } });
-  nextEl.addEventListener('click', next);
-  prevEl.addEventListener('click', prev);
+  // Main controls (guarded for pages that omit the player shell)
+  if(controlsPresent){
+    toggleEl.addEventListener('click', ()=>{ if(audio.paused){ audio.play(); } else { audio.pause(); } });
+    nextEl.addEventListener('click', next);
+    prevEl.addEventListener('click', prev);
 
-  shuffleEl.addEventListener('click', ()=>{
-    shuffle = !shuffle;
-    localStorage.setItem('lot_shuffle', shuffle ? '1':'0');
-    applyShuffleUI();
-  });
+    shuffleEl.addEventListener('click', ()=>{
+      shuffle = !shuffle;
+      localStorage.setItem('lot_shuffle', shuffle ? '1':'0');
+      applyShuffleUI();
+    });
 
-  repeatEl.addEventListener('click', ()=>{
-    repeatMode = (repeatMode === 'none') ? 'all' : (repeatMode === 'all') ? 'one' : 'none';
-    localStorage.setItem('lot_repeat', repeatMode);
-    applyRepeatUI();
-  });
+    repeatEl.addEventListener('click', ()=>{
+      repeatMode = (repeatMode === 'none') ? 'all' : (repeatMode === 'all') ? 'one' : 'none';
+      localStorage.setItem('lot_repeat', repeatMode);
+      applyRepeatUI();
+    });
+  }
 
   // Seek
-  seekEl.addEventListener('input', ()=>{
+  seekEl?.addEventListener('input', ()=>{
     if(!isFinite(audio.duration)) return;
     audio.currentTime = (seekEl.value/100)*(audio.duration||0);
   });
@@ -224,9 +259,9 @@
   audio.addEventListener('timeupdate', ()=>{
     if(!isFinite(audio.duration)) return;
     const pct = (audio.currentTime/(audio.duration||1))*100;
-    seekEl.value = pct;
-    curEl.textContent = fmt(audio.currentTime);
-    durEl.textContent = fmt(audio.duration||0);
+    if(seekEl) seekEl.value = pct;
+    if(curEl) curEl.textContent = fmt(audio.currentTime);
+    if(durEl) durEl.textContent = fmt(audio.duration||0);
 
     const cur = queue[idx];
     if(cur){

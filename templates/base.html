@@ -532,7 +532,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      min-height: 240px;
+      height: 400px;
     }
 
     .live-player-embed iframe {
@@ -902,7 +902,7 @@
   </style>
   {% block head %}{% endblock %}
 </head>
-<body>
+<body data-default-cover="{% static 'assets/LOT-LOGO-PNG-WHITE.png' %}">
   <div class="lot-gradient-bar" aria-hidden="true"></div>
 
   <!-- Navigation -->
@@ -1332,7 +1332,7 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- <script src="{% static 'assets/player.js' %}"></script> -->
+  <script defer src="{% static 'assets/player.js' %}"></script>
   
   <!-- Radio.co Integration
   <script src="https://embed.radio.co/embed/s1702795f8/status.js"></script>
@@ -1340,10 +1340,8 @@
   <script src="https://embed.radio.co/embed/s1702795f8/artwork.js"></script>
   <script src="https://embed.radio.co/embed/s1702795f8/song.js"></script> -->
   
-  <!-- Alternative Player Script (hidden) -->
-  <div id="player2Container" style="display: none;">
-    <script src="https://embed.radio.co/player/57315ab.js"></script>
-  </div>
+  <!-- Alternative Player container (script loaded on demand) -->
+  <div id="player2Container" style="display: none;"></div>
 
   <script>
   const img = document.querySelectorAll("current-artwork");
@@ -1562,17 +1560,16 @@
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
     
-    // Load player 2 after modal is shown
+    // Load player 2 after modal is shown (lazy-load the script once)
     modal.addEventListener('shown.bs.modal', function() {
       const embedDiv = document.getElementById('player2Embed');
       if (embedDiv) {
-        // This would require additional setup for the second player
-        embedDiv.innerHTML = `
-          <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            Alternative player would load here. Using primary player for now.
-          </div>
-        `;
+        if (!window._player2Loaded) {
+          const s = document.createElement('script');
+          s.src = 'https://embed.radio.co/player/57315ab.js';
+          s.onload = ()=> window._player2Loaded = true;
+          embedDiv.appendChild(s);
+        }
       }
     });
     
