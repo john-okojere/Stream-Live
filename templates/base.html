@@ -1134,18 +1134,18 @@
         <div class="col-lg-8">
           <div class="live-player-embed">
             <!-- Radio.co Player 1 -->
-            <script src="https://embed.radio.co/player/05d5829.js"></script>
+            <script src="https://embed.radio.co/player/3c1bba1.js"></script>
             <div class="loading-skeleton" style="height:400px;"></div>
           </div>
           
           <div class="mt-3 d-flex flex-wrap gap-2">
-            <a href="https://streaming.radio.co/s1702795f8/listen" 
+            <a href="https://streaming.radio.co/s7575f8c22/listen" 
                target="_blank" 
                class="btn btn-outline-light btn-sm">
               <i class="bi bi-play-fill me-1"></i> Direct Stream (192kbps)
             </a>
             
-            <a href="http://streaming.radio.co/s1702795f8/listen.m3u" 
+            <a href="http://streaming.radio.co/s7575f8c22/listen.m3u" 
                target="_blank" 
                class="btn btn-outline-light btn-sm">
               <i class="bi bi-list-ul me-1"></i> Playlist (M3U)
@@ -1335,10 +1335,10 @@
   <script defer src="{% static 'assets/player.js' %}"></script>
   
   <!-- Radio.co Integration
-  <script src="https://embed.radio.co/embed/s1702795f8/status.js"></script>
-  <script src="https://embed.radio.co/embed/s1702795f8/dj.js"></script>
-  <script src="https://embed.radio.co/embed/s1702795f8/artwork.js"></script>
-  <script src="https://embed.radio.co/embed/s1702795f8/song.js"></script> -->
+  <script src="https://embed.radio.co/embed/s7575f8c22/status.js"></script>
+  <script src="https://embed.radio.co/embed/s7575f8c22/dj.js"></script>
+  <script src="https://embed.radio.co/embed/s7575f8c22/artwork.js"></script>
+  <script src="https://embed.radio.co/embed/s7575f8c22/song.js"></script> -->
   
   <!-- Alternative Player container (script loaded on demand) -->
   <div id="player2Container" style="display: none;"></div>
@@ -1348,9 +1348,9 @@
   img.forEach(element => element.removeAttribute("crossorigin"));
   // Global configuration
   const LOT_CONFIG = {
-    radioStation: 's1702795f8',
+    radioStation: 's7575f8c22',
     apiBase: '{% url "stream:sidebar_summary_json" %}',
-    statusUrl: 'https://public.radio.co/stations/s1702795f8/status'
+    statusUrl: 'https://public.radio.co/stations/s7575f8c22/status'
   };
 
   // Suppress noisy CORS image errors from the radio.co artwork host
